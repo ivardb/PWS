@@ -1,4 +1,4 @@
-package core;
+package UI;
 
 public class main {
 
