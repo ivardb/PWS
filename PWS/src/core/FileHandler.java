@@ -4,12 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-	public static void SaveParameters(String filePath, String fileContent) {
+	public void SaveParameters(String filePath, String fileContent) {
 		// Writing content
 				
 		try {
@@ -23,7 +25,18 @@ public class FileHandler {
 			System.out.println("Done");
 	}
 	
-	public static BufferedImage LoadImage(String imgPath,  int width, int height) {
+	public String LoadParameters(String filePath) {
+		//get file contents in a string
+		String fileContent = null;
+		try {
+			fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileContent;
+	}
+	
+	public BufferedImage LoadImage(String imgPath,  int width, int height) {
 		//create a buffered image from a given file
 		
 		File img = new File(imgPath);
@@ -34,5 +47,15 @@ public class FileHandler {
 			e.printStackTrace();
 		}
 		return image;
+	}
+	
+	public void SaveImage(BufferedImage BufImg, String savePath) {
+		//save a buffered image to file
+		File outputFile = new File(savePath);
+		try {
+			ImageIO.write(BufImg, "png", outputFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
