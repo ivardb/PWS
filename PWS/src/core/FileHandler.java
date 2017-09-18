@@ -1,11 +1,7 @@
 package core;
 import java.awt.image.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 
 import javax.imageio.ImageIO;
 
