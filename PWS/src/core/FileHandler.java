@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 public class FileHandler {
 
 	public static void SaveParameters(String filePath, String fileContent) {
-				
+		// test
 		try {
 			FileWriter fWriter = new FileWriter(filePath);
 			BufferedWriter bWriter = new BufferedWriter(fWriter);
