@@ -35,7 +35,7 @@ public class FileHandler {
 		//create a buffered image from a given file
 		
 		File img = new File(imgPath);
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 		try {
 			image = ImageIO.read(img);
 		} catch (IOException e) {
@@ -53,4 +53,5 @@ public class FileHandler {
 			e.printStackTrace();
 		}
 	}
+	
 }
