@@ -17,24 +17,23 @@ public class FileHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Done");
 	}
 	
-	public String loadParameters(String filePath) {
+	public static String loadParameters(String file_path) {
 		//get file contents in a string
-		String fileContent = null;
+		String file_content = null;
 		try {
-			fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
+			file_content = new String(Files.readAllBytes(Paths.get(file_path)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return fileContent;
+		return file_content;
 	}
 	
-	public BufferedImage loadImage(String imgPath,  int width, int height) {
+	public static BufferedImage loadImage(String img_path,  int width, int height) {
 		//create a buffered image from a given file
 		
-		File img = new File(imgPath);
+		File img = new File(img_path);
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
 		try {
 			image = ImageIO.read(img);
@@ -44,11 +43,11 @@ public class FileHandler {
 		return image;
 	}
 	
-	public void saveImage(BufferedImage BufImg, String savePath) {
+	public static void saveImage(BufferedImage buf_img, String save_path) {
 		//save a buffered image to file
-		File outputFile = new File(savePath);
+		File output_file = new File(save_path);
 		try {
-			ImageIO.write(BufImg, "png", outputFile);
+			ImageIO.write(buf_img, "png", output_file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
