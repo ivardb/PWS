@@ -6,7 +6,7 @@ import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-	public void saveParameters(String file_path, String file_content) {
+	public static void saveParameters(String file_path, String file_content) {
 		// Writing content
 				
 		try {
