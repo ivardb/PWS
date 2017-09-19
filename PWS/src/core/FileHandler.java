@@ -2,26 +2,25 @@ package core;
 import java.awt.image.*;
 import java.io.*;
 import java.nio.file.*;
-
 import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-	public void SaveParameters(String filePath, String fileContent) {
+	public void saveParameters(String file_path, String file_content) {
 		// Writing content
 				
 		try {
-			FileWriter fWriter = new FileWriter(filePath);
-			BufferedWriter bWriter = new BufferedWriter(fWriter);
-			bWriter.write(fileContent);
-			bWriter.close();
+			FileWriter f_writer = new FileWriter(file_path);
+			BufferedWriter b_writer = new BufferedWriter(f_writer);
+			b_writer.write(file_content);
+			b_writer.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			System.out.println("Done");
 	}
 	
-	public String LoadParameters(String filePath) {
+	public String loadParameters(String filePath) {
 		//get file contents in a string
 		String fileContent = null;
 		try {
@@ -32,7 +31,7 @@ public class FileHandler {
 		return fileContent;
 	}
 	
-	public BufferedImage LoadImage(String imgPath,  int width, int height) {
+	public BufferedImage loadImage(String imgPath,  int width, int height) {
 		//create a buffered image from a given file
 		
 		File img = new File(imgPath);
@@ -45,7 +44,7 @@ public class FileHandler {
 		return image;
 	}
 	
-	public void SaveImage(BufferedImage BufImg, String savePath) {
+	public void saveImage(BufferedImage BufImg, String savePath) {
 		//save a buffered image to file
 		File outputFile = new File(savePath);
 		try {
