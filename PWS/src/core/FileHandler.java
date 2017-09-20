@@ -2,40 +2,39 @@ package core;
 import java.awt.image.*;
 import java.io.*;
 import java.nio.file.*;
-
 import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-	public static void SaveParameters(String filePath, String fileContent) {
-		// test
+	public static void saveParameters(String file_path, String file_content) {
+		// Writing content
+				
 		try {
-			FileWriter fWriter = new FileWriter(filePath);
-			BufferedWriter bWriter = new BufferedWriter(fWriter);
-			bWriter.write(fileContent);
-			bWriter.close();
+			FileWriter f_writer = new FileWriter(file_path);
+			BufferedWriter b_writer = new BufferedWriter(f_writer);
+			b_writer.write(file_content);
+			b_writer.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Done");
 	}
 	
-	public static String LoadParameters(String filePath) {
+	public static String loadParameters(String file_path) {
 		//get file contents in a string
-		String fileContent = null;
+		String file_content = null;
 		try {
-			fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
+			file_content = new String(Files.readAllBytes(Paths.get(file_path)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return fileContent;
+		return file_content;
 	}
 	
-	public static BufferedImage LoadImage(String imgPath,  int width, int height) {
+	public static BufferedImage loadImage(String img_path,  int width, int height) {
 		//create a buffered image from a given file
 		
-		File img = new File(imgPath);
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+		File img = new File(img_path);
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
 		try {
 			image = ImageIO.read(img);
 		} catch (IOException e) {
@@ -44,14 +43,13 @@ public class FileHandler {
 		return image;
 	}
 	
-	public static void SaveImage(BufferedImage BufImg, String savePath) {
+	public static void saveImage(BufferedImage buf_img, String save_path) {
 		//save a buffered image to file
-		File outputFile = new File(savePath);
+		File output_file = new File(save_path);
 		try {
-			ImageIO.write(BufImg, "png", outputFile);
+			ImageIO.write(buf_img, "png", output_file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
 }
