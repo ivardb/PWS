@@ -6,7 +6,8 @@ import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-	public static void saveParameters(String file_path, String file_content) {
+	public static void saveParameters(String file_path, String file_content) 
+	{
 		// Writing content
 				
 		try {
@@ -19,7 +20,8 @@ public class FileHandler {
 			}
 	}
 	
-	public static String loadParameters(String file_path) {
+	public static String loadParameters(String file_path) 
+	{
 		//get file contents in a string
 		String file_content = null;
 		try {
@@ -30,7 +32,8 @@ public class FileHandler {
 		return file_content;
 	}
 	
-	public static BufferedImage loadImage(String img_path,  int width, int height) {
+	public static BufferedImage loadImage(String img_path,  int width, int height) 
+	{
 		//create a buffered image from a given file
 		
 		File img = new File(img_path);
@@ -43,7 +46,8 @@ public class FileHandler {
 		return image;
 	}
 	
-	public static void saveImage(BufferedImage buf_img, String save_path) {
+	public static void saveImage(BufferedImage buf_img, String save_path) 
+	{
 		//save a buffered image to file
 		File output_file = new File(save_path);
 		try {
