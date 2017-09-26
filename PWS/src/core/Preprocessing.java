@@ -15,7 +15,7 @@ public class Preprocessing
 		int height = input_image.getHeight();
 		if(width/height > IMAGE_WIDTH / IMAGE_HEIGHT)
 		{
-			//too broad
+			//too wide
 			double scale = IMAGE_HEIGHT/height;
 			input_image = scale(input_image, scale);
 			width = input_image.getWidth();
@@ -36,21 +36,17 @@ public class Preprocessing
 		for( int i = 0; i < IMAGE_WIDTH; i++ )
 		    for( int j = 0; j < IMAGE_HEIGHT; j++ )
 		        pixels[i][j] = input_image.getRGB( i, j );
-		        Maarten is dit de goed pixel array snap geen zak van je code*/
+		        Maarten is dit de goede pixel array snap geen zak van je code*/
 		return null;
 	}
 	
 	private static BufferedImage scale(BufferedImage input_image, double scale)
 	{
-		int output_img_width = (int) (input_image.getWidth() * scale);
-		int output_img_height = (int) (input_image.getHeight() * scale);
-		
-		BufferedImage output_image = new BufferedImage(output_img_width, output_img_height, BufferedImage.TYPE_INT_BGR);
-		AffineTransform scale_instance = AffineTransform.getScaleInstance(scale, scale);
-		AffineTransformOp scale_op = new AffineTransformOp(scale_instance, AffineTransformOp.TYPE_BILINEAR);
-		
-		
-		return null;
+		AffineTransform at = new AffineTransform();
+		at.scale(scale, scale); 
+		AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+		input_image = op.filter(input_image, null);
+		return input_image;
 	}
 	
 	private static BufferedImage crop(BufferedImage input_image, int start_x, int start_y, int width, int height) 
