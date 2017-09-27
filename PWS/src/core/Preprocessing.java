@@ -1,8 +1,7 @@
 package core;
 
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 
 public class Preprocessing 
 {	
@@ -31,13 +30,8 @@ public class Preprocessing
 			int y_begin = (height - IMAGE_WIDTH)/2;
 			input_image = crop(input_image, 0, y_begin, IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
-		/*int[][] pixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
-
-		for( int i = 0; i < IMAGE_WIDTH; i++ )
-		    for( int j = 0; j < IMAGE_HEIGHT; j++ )
-		        pixels[i][j] = input_image.getRGB( i, j );
-		        Maarten is dit de goede pixel array snap geen zak van je code*/
-		return null;
+		float[] pixels = ((DataBufferFloat)input_image.getRaster().getDataBuffer()).getData();
+		return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
 	}
 	
 	private static BufferedImage scale(BufferedImage input_image, double scale)
