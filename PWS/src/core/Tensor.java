@@ -89,7 +89,75 @@ public class Tensor {
 	
 	public void convolveWith(Tensor kernel)
 	{
-		//ToDo
+		//create a temporary tensor to hold the result
+		int[] resulting_lengths = new int[this.dimension];
+		for(int i = 0; i < this.dimension; i++)
+		{
+			resulting_lengths[i] = this.lengths[i] - (this.lengths[i] % kernel.lengths[i]);
+		}
+		Tensor result = new Tensor(resulting_lengths);
+		
+		//holds the 'coordinate' of the cell
+		int[] indices = new int[this.dimension];							
+		for(int i = 0; i < this.dimension; i++)	
+		{
+			//start the iteration in the 'top-left corner'
+			indices[i] = 0;													
+		}
+		
+		for(int index = 0; index < result.total_data_length; index++)
+		{
+			//this variable holds the result of applying the convolution operation to a single cell
+			float sum = 0.0f;												
+			
+			//holds the 'coordinate' index of the kernel cell
+			int[] kernel_indices = new int[this.dimension];					
+			for(int j = 0; j < this.dimension; j++)
+			{
+				//we start the iteration in the 'top-left corner'
+				kernel_indices[j] = 0;										
+			}
+			//iterate over the kernel
+			for(int kernel_index = 0; kernel_index < kernel.total_data_length; kernel_index++)				
+			{
+				//holds the 'coordinates' of the cell whose value is going to be multiplied with a kernel cell value
+				int[] value_indices = new int[this.dimension];				
+				for(int i = 0; i < this.dimension; i++)
+				{
+					value_indices[i] = indices[i] + kernel_indices[i];
+				}
+
+				//add the result of the multiplication to the sum
+				sum += this.get(value_indices)*kernel.get(kernel_indices);			
+				
+				//update the kernel coordinates
+				kernel_indices[0]++;
+				for(int i = 0; i < this.dimension; i++)						
+				{
+					if(kernel_indices[i] == kernel.lengths[i] && i != this.dimension - 1)
+					{
+						kernel_indices[i] = 0;
+						kernel_indices[i+1]++;
+					}
+				}
+			}
+			
+			//set the cell in the 'result' tensor to the correct value
+			result.set(sum, indices);									
+			
+			//update the tensor coordinates
+			indices[0]++;
+			for(int i = 0; i < this.dimension; i++)					
+			{
+				if(indices[i] == result.lengths[i] && i != this.dimension - 1)
+				{
+					indices[i] = 0;
+					indices[i+1]++;
+				}
+			}
+		}
+		
+		this.become(result);											
 	}
 	
 	//rectified linear unit
