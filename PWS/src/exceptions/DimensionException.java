@@ -1,6 +1,5 @@
 package exceptions;
 
-//this exception is meant to be thrown when there are issues with tensor dimensions
 
 public class DimensionException extends Exception{
 	
