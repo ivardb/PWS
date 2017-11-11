@@ -138,18 +138,195 @@ public class Tensor {
 		this.become(tmp);
 	}
 	
-	public void convolveWith(Tensor kernel) throws DimensionException
+	//reduces dimension wherever possible
+	//for example: a matrix of width 1 becomes a vector
+	public void reduceDimension() throws DimensionException
 	{
-		if(this.dimension != kernel.dimension)
+		//count how many dimensions can be removed
+		int reduction_count = 0;
+		for(int length : this.lengths)
 		{
+			if(length == 1)
+			{
+				reduction_count++;
+			}
+		}
+		
+		//create a temporary tensor to hold the result
+		int[] resulting_lengths = new int[this.dimension - reduction_count];
+		int index = 0;
+		for(int i = 0; i < this.dimension; i++)
+		{
+			if(this.lengths[i] != 1)
+			{
+				resulting_lengths[index] = this.lengths[i];
+				index++;
+			}
+		}
+		Tensor result = new Tensor(resulting_lengths);
+		
+		int[] indices = new int[result.dimension];
+		for(int i = 0; i < result.dimension; i++)
+		{
+			indices[i] = 0;
+		}
+		
+		int[] old_indices = new int[this.dimension];
+		
+		for(int i = 0; i < result.total_data_length; i++)
+		{
+			//find the indices in the original tensor from the indices in the resulting tensor
+			index = 0;
+			for(int j = 0; j < this.dimension; j++)
+			{
+				if(this.lengths[j] == 1)
+				{
+					old_indices[j] = 0;
+				}
+				else
+				{
+					old_indices[j] = indices[index];
+				}
+				index++;
+			}
 			
+			//copy
+			result.set(this.get(), indices);
+			
+			//update indices
+			indices[0]++;
+			for(int j = 0; j < result.dimension - 1; j++)
+			{
+				if(indices[j] == result.lengths[j])
+				{
+					indices[j] = 0;
+					indices[j+1]++;
+				}
+			}
+		}
+		
+		this.become(result);
+	}
+	
+	//performs max pooling on the tensor, using a 'kernel' of the given size
+	public void maxPool(int... pooling_lengths) throws DimensionException
+	{		
+		if(pooling_lengths.length != this.dimension)
+		{
+			throw new DimensionException("dimensions don't match");
+		}
+		
+		//if the pooling 'kernel' is a single cell, nothing will happen and we might as well return
+		boolean trivial = true;
+		for(int length : pooling_lengths)
+		{
+			if(length != 1)
+			{
+				trivial = false;
+				break;
+			}
+		}
+		if(trivial)
+		{
+			return;
 		}
 		
 		//create a temporary tensor to hold the result
 		int[] resulting_lengths = new int[this.dimension];
 		for(int i = 0; i < this.dimension; i++)
 		{
-			resulting_lengths[i] = this.lengths[i] - (this.lengths[i] % kernel.lengths[i]);
+			resulting_lengths[i] = (int)Math.ceil((double)this.lengths[i]/(double)pooling_lengths[i]);
+		}
+		Tensor result = new Tensor(resulting_lengths);
+		
+		//initialize result indices
+		int[] indices = new int[this.dimension];
+		for(int i = 0; i < this.dimension; i++)
+		{
+			indices[i] = 0;
+		}
+		
+		//compute total size of pooling kernel
+		int total_pooling_size = 1;
+		for(int length : pooling_lengths)
+		{
+			total_pooling_size *= length;
+		}
+		
+		for(int i = 0; i < result.total_data_length; i++)
+		{
+			float max_value = 0.0f;
+			
+			//initialize pooling indices
+			int[] pooling_indices = new int[this.dimension];
+			for(int j = 0; j < this.dimension; j++)
+			{
+				pooling_indices[j] = 0;
+			}
+			
+			for(int j = 0; j < total_pooling_size; j++)
+			{
+				//check whether the cell we want to check is not outside the tensor (which would give an IndexOutOfBoundsException)
+				int[] total_indices = new int[this.dimension];
+				boolean is_inside_tensor = true;
+				for(int k = 0; k < this.dimension; k++)
+				{
+					total_indices[k] = indices[k]*pooling_lengths[k]+pooling_indices[k];
+					if(total_indices[k] >= this.lengths[k])
+					{
+						is_inside_tensor = false;
+						break;
+					}
+				}
+								
+				if(is_inside_tensor)
+				{
+					max_value = Math.max(max_value, this.get(total_indices));
+				}
+				
+				//update pooling indices
+				pooling_indices[0]++;
+				for(int k = 0; k < pooling_indices.length - 1; k++)
+				{
+					if(pooling_indices[k] == pooling_lengths[k])
+					{
+						pooling_indices[k] = 0;
+						pooling_indices[k+1]++;
+					}
+				}
+			}
+			
+			result.set(max_value, indices);
+			
+			//update result indices
+			indices[0]++;
+			for(int j = 0; j < indices.length-1; j++)
+			{
+				if(indices[j] == result.lengths[j])
+				{
+					indices[j] = 0;
+					indices[j+1]++;
+				}
+			}
+		}
+		
+		this.become(result);
+	}
+	
+	//performs the convolution operation on the tensor with given kernel as operator
+	//zero padding is used, so the resulting tensor will be the exact same size as the original
+	public void convolveWith(Tensor kernel) throws DimensionException
+	{
+		if(this.dimension != kernel.dimension)
+		{
+			throw new DimensionException("dimensions don't match");
+		}
+		
+		//create a temporary tensor to hold the result
+		int[] resulting_lengths = new int[this.dimension];
+		for(int i = 0; i < this.dimension; i++)
+		{
+			resulting_lengths[i] = this.lengths[i];
 		}
 		Tensor result = new Tensor(resulting_lengths);
 		
@@ -164,8 +341,8 @@ public class Tensor {
 		for(int index = 0; index < result.total_data_length; index++)
 		{
 			//this variable holds the result of applying the convolution operation to a single cell
-			float sum = 0.0f;												
-			
+			float sum = 0.0f;	
+
 			//holds the 'coordinate' index of the kernel cell
 			int[] kernel_indices = new int[this.dimension];					
 			for(int j = 0; j < this.dimension; j++)
@@ -177,14 +354,23 @@ public class Tensor {
 			for(int kernel_index = 0; kernel_index < kernel.total_data_length; kernel_index++)				
 			{
 				//holds the 'coordinates' of the cell whose value is going to be multiplied with a kernel cell value
+				//also checks whether the cell lies inside the tensor (otherwise, we assume it's 0)
+				boolean is_inside_tensor = true;
 				int[] value_indices = new int[this.dimension];				
 				for(int i = 0; i < this.dimension; i++)
 				{
 					value_indices[i] = indices[i] + kernel_indices[i];
+					if(value_indices[i] >= this.lengths[i])
+					{
+						is_inside_tensor = false;
+					}
 				}
 
 				//add the result of the multiplication to the sum
-				sum += this.get(value_indices)*kernel.get(kernel_indices);			
+				if(is_inside_tensor)
+				{
+					sum += this.get(value_indices)*kernel.get(kernel_indices);	
+				}		
 				
 				//update the kernel coordinates
 				kernel_indices[0]++;
