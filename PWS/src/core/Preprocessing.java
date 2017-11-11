@@ -3,6 +3,8 @@ package core;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
+import exceptions.DimensionException;
+
 public class Preprocessing 
 {	
 	private static final int IMAGE_WIDTH = 256;
@@ -31,7 +33,12 @@ public class Preprocessing
 			input_image = crop(input_image, 0, y_begin, IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
 		float[] pixels = ((DataBufferFloat)input_image.getRaster().getDataBuffer()).getData();
-		return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
+		
+		try {
+			return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
+		} catch (DimensionException e) {
+			throw new RuntimeException("Error extracting pixel data from image",e);
+		}
 	}
 	
 	private static BufferedImage scale(BufferedImage input_image, double scale)

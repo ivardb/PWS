@@ -1,5 +1,8 @@
 package core;
 
+import java.util.concurrent.ThreadLocalRandom;
+import exceptions.*;
+
 public class Tensor {
 
 	public int dimension; //the dimension of the Tensor
@@ -28,19 +31,38 @@ public class Tensor {
 		this.data = new float[this.total_data_length];
 	}
 	
-	public Tensor(float[] data, int... lengths)
+	public Tensor(float[] data, int... lengths) throws DimensionException
 	{
 		this(lengths);
+		
+		if(data.length != this.total_data_length)
+		{
+			throw new IndexOutOfBoundsException("data is not of the right size");
+		}
 		this.data = data;
 	}
 	
+	//create a tensor of given dimensions and fill it with random data in the given range
+	public Tensor(float lower, float upper, int... lengths)
+	{
+		this(lengths);
+		for(int i = 0; i < this.total_data_length; i++)
+		{
+			this.data[i] = ThreadLocalRandom.current().nextFloat() * (upper - lower) + lower;
+		}
+	}
+	
 	//merges an array of same-size tensors into one large tensor
-	public Tensor(Tensor[] tensors)
+	public Tensor(Tensor[] tensors) throws DimensionException
 	{
 		//create a new, temporary tensor of the correct dimensions
 		int[] lengths = new int[tensors[0].dimension + 1];
 		for(int i = 0; i < tensors[0].dimension; i++)
 		{
+			if(tensors[i].dimension != tensors[0].dimension)
+			{
+				throw new DimensionException("Not all tensors are of the same dimension");
+			}
 			lengths[i] = tensors[0].lengths[i];
 		}
 		lengths[tensors[0].dimension] = tensors.length;
@@ -67,8 +89,13 @@ public class Tensor {
 		this.data = tensor.data;
 	}
 
-	public float get(int... indices)
+	public float get(int... indices) throws DimensionException
 	{		
+		if(indices.length != this.dimension)
+		{
+			throw new DimensionException("the amount of indices must be equal to the dimension");
+		}
+		
 		return this.data[this.getSerializedDataIndex(indices)];
 	}
 
@@ -77,18 +104,47 @@ public class Tensor {
 		return this.data;
 	}
 	
-	public void set(float value, int... indices)
+	public void set(float value, int... indices) throws DimensionException
 	{
+		if(indices.length != this.dimension)
+		{
+			throw new DimensionException("the amount of indices must be equal to the dimension");
+		}
 		this.data[this.getSerializedDataIndex(indices)] = value;
 	}
 
 	public void flatten()
 	{
-		//ToDo
+		//create a new tensor, with the last dimension 'missing'
+		int[] new_lengths = new int[this.dimension - 1];
+		for(int i = 0; i < this.dimension - 1; i++)
+		{
+			new_lengths[i] = this.lengths[i];
+		}
+		Tensor tmp = new Tensor(new_lengths);
+		
+		//take the average of every 'column', take it's average and put it into a single cell in the new tensor
+		int depth = this.lengths[this.dimension - 1];
+		for(int i = 0; i < tmp.total_data_length; i++)
+		{
+			float sum = 0;
+			for(int j = 0; j < depth; j++)
+			{
+				sum += this.data[depth*i + j];
+			}
+			tmp.data[i] = sum / depth;
+		}
+		
+		this.become(tmp);
 	}
 	
-	public void convolveWith(Tensor kernel)
+	public void convolveWith(Tensor kernel) throws DimensionException
 	{
+		if(this.dimension != kernel.dimension)
+		{
+			
+		}
+		
 		//create a temporary tensor to hold the result
 		int[] resulting_lengths = new int[this.dimension];
 		for(int i = 0; i < this.dimension; i++)
@@ -173,8 +229,13 @@ public class Tensor {
 	}
 	
 	//turn multidimensional indices into a single index in the serialized array
-	private int getSerializedDataIndex(int... indices)
+	private int getSerializedDataIndex(int... indices) throws DimensionException
 	{
+		if(indices.length != this.dimension)
+		{
+			throw new DimensionException("the amount of indices must be equal to the dimension");
+		}
+		
 		int index = 0;
 		for(int i = 0; i < this.dimension; i++)
 		{
