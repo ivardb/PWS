@@ -6,6 +6,10 @@ import javax.imageio.ImageIO;
 
 public class FileHandler {
 
+//add the width and height of the training pictures
+public final static int picture_width = ;
+public final static int picture_height = ;
+
 	public static void saveParameters(String file_path, String file_content) 
 	{
 		// Writing content
@@ -32,12 +36,12 @@ public class FileHandler {
 		return file_content;
 	}
 	
-	public static BufferedImage loadImage(String img_path,  int width, int height) 
+	public static BufferedImage loadImage(String img_path) 
 	{
 		//create a buffered image from a given file
 		
 		File img = new File(img_path);
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+		BufferedImage image = new BufferedImage(picture_width, picture_height, BufferedImage.TYPE_INT_BGR);
 		try {
 			image = ImageIO.read(img);
 		} catch (IOException e) {
