@@ -34,11 +34,7 @@ public class Preprocessing
 		}
 		float[] pixels = ((DataBufferFloat)input_image.getRaster().getDataBuffer()).getData();
 		
-		try {
-			return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
-		} catch (DimensionException e) {
-			throw new RuntimeException("Error extracting pixel data from image",e);
-		}
+		return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
 	}
 	
 	private static BufferedImage scale(BufferedImage input_image, double scale)

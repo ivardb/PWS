@@ -39,6 +39,8 @@ public class ConvolutionalNeuralNetwork {
 		this.dimension_in = input_layer.dimension_in;
 		this.dimension_out = input_layer.dimension_out;
 		
+		this.output_lengths = input_layer.output_lengths;
+		
 		this.neuron_in_count = input_layer.neuron_count;
 		this.neuron_out_count = input_layer.neuron_count;
 	}
@@ -57,7 +59,7 @@ public class ConvolutionalNeuralNetwork {
 			//the output of the previous layer is of a different dimension than the input of the layer we want to add
 			return DIMENSION_ERROR;
 		}
-		else if(this.output_lengths != layer.input_lengths || this.neuron_out_count != layer.neuron_count)
+		else if(!(this.output_lengths.equals(layer.input_lengths) || this.dimension_in == 0) || this.neuron_out_count != layer.neuron_count)
 		{
 			//the output of the previous layer is of a different size than the input of the layer we want to add
 			return SIZE_ERROR;
@@ -127,5 +129,18 @@ public class ConvolutionalNeuralNetwork {
 			this.dimension_out = this.neuron_layers.get(this.neuron_layer_count - 1).dimension_out;
 			return CONV_NET_OK;
 		}
+	}
+	
+	//process some given input data
+	public Tensor[] process(Tensor[] input_data) throws Exception
+	{
+		this.neuron_layers.get(0).process(input_data);
+		for(int i = 0; i < this.kernel_layer_count; i++)
+		{
+			Tensor[] prev_layer_data = this.neuron_layers.get(i).neuron_data;
+			prev_layer_data = this.kernel_layers.get(i).process(prev_layer_data);
+			this.neuron_layers.get(i+1).process(prev_layer_data);
+		}
+		return this.neuron_layers.get(this.neuron_out_count-1).neuron_data;
 	}
 }

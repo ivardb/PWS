@@ -31,7 +31,7 @@ public class Tensor {
 		this.data = new float[this.total_data_length];
 	}
 	
-	public Tensor(float[] data, int... lengths) throws DimensionException
+	public Tensor(float[] data, int... lengths)
 	{
 		this(lengths);
 		
@@ -69,7 +69,7 @@ public class Tensor {
 		Tensor tmp = new Tensor(lengths);
 		
 		//put in all the data
-		for(int i = 0; i < this.total_data_length; i++)
+		for(int i = 0; i < tensors[0].total_data_length; i++)
 		{
 			for(int j = 0; j < tensors.length; j++)
 			{
@@ -194,6 +194,8 @@ public class Tensor {
 			result.set(this.get(), indices);
 			
 			//update indices
+			if(indices.length == 0)
+				break;
 			indices[0]++;
 			for(int j = 0; j < result.dimension - 1; j++)
 			{
@@ -285,6 +287,8 @@ public class Tensor {
 				}
 				
 				//update pooling indices
+				if(this.dimension == 0)
+						break;
 				pooling_indices[0]++;
 				for(int k = 0; k < pooling_indices.length - 1; k++)
 				{
@@ -373,6 +377,8 @@ public class Tensor {
 				}		
 				
 				//update the kernel coordinates
+				if(this.dimension == 0)
+					break;
 				kernel_indices[0]++;
 				for(int i = 0; i < this.dimension; i++)						
 				{
@@ -388,6 +394,8 @@ public class Tensor {
 			result.set(sum, indices);									
 			
 			//update the tensor coordinates
+			if(this.dimension == 0)
+				break;
 			indices[0]++;
 			for(int i = 0; i < this.dimension; i++)					
 			{

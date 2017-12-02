@@ -6,9 +6,9 @@ import javax.imageio.ImageIO;
 
 public class FileHandler {
 
-//add the width and height of the training pictures
-public final static int picture_width = ;
-public final static int picture_height = ;
+//add the width and height of the training pictures (values temporary)
+public final static int picture_width = 256;
+public final static int picture_height = 256;
 
 	public static void saveParameters(String file_path, String file_content) 
 	{

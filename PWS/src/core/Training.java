@@ -19,9 +19,4 @@ public class Training {
 		return null;
 	}
 	
-	private float cost(Tensor image_tensor) {
-		//run tensor through cnn and calculate the cost
-	}
-	
-	//whole lot of backpropagation succes maarten
 }
