@@ -12,15 +12,12 @@ public class main {
 		
 		/*try 
 		{
-			NeuronLayer layer = new NeuronLayer(1, new int[] {4,4}, new int[] {2,2});
-			Tensor[] input = new Tensor[] {new Tensor(new float[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}, 4, 4)};
-			layer.process(input);
-			for(float value : layer.neuron_data[0].getSerializedData())
-			{
-				System.out.println(value);
-			}
+			Tensor t1 = new Tensor(new float[] {1,2,3,4},2,2);
+			Tensor t2 = t1.maxPool(2,2);
+			Tensor t3 = Tensor.invertMaxPooling(t1, t2, 2, 2);
+			System.out.println(t3.getSerializedData()[3]);
 		} 
-		catch (DimensionException | NumericalException e) 
+		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}*/
@@ -42,7 +39,7 @@ public class main {
 			
 			
 			Tensor[][] layer2_weights = new Tensor[][] {
-				new Tensor[] {new Tensor(new float[] {1}), new Tensor(new float[] {1})},
+				new Tensor[] {new Tensor(new float[] {1}), new Tensor(new float[] {2})},
 				new Tensor[] {new Tensor(new float[] {1}), new Tensor(new float[] {1})}
 			};
 			KernelLayer kernel_layer2 = new KernelLayer(layer2_weights);
@@ -57,12 +54,14 @@ public class main {
 			conv_net.addNeuronLayer(neuron_layer3);
 			
 			Tensor[] input = new Tensor[] {
-					new Tensor(new float[] {7.0f}),
-					new Tensor(new float[] {2.0f}),
+					new Tensor(new float[] {1.0f}),
+					new Tensor(new float[] {1.0f}),
 					new Tensor(new float[] {1.0f})
 			};
 			
-			System.out.println(conv_net.process(input)[0].getSerializedData()[0]);
+			//System.out.println(conv_net.process(input)[0].getSerializedData()[0]);
+			conv_net.backpropagate(input, new Tensor[] {new Tensor(new float[] {1.5f}), new Tensor(new float[] {1.5f})});
+			conv_net.dumpData("convnetdata.txt");
 		} 
 		catch (Exception e) 
 		{

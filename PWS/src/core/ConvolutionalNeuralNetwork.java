@@ -1,6 +1,17 @@
 package core;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 //work in progress
 public class ConvolutionalNeuralNetwork {
@@ -141,6 +152,67 @@ public class ConvolutionalNeuralNetwork {
 			prev_layer_data = this.kernel_layers.get(i).process(prev_layer_data);
 			this.neuron_layers.get(i+1).process(prev_layer_data);
 		}
-		return this.neuron_layers.get(this.neuron_out_count-1).neuron_data;
+		return this.neuron_layers.get(this.neuron_layer_count-1).neuron_data;
 	}
+	
+	//generalized backpropagation algorithm
+	public void backpropagate(Tensor[] input, Tensor[] desired_output) throws Exception
+	{
+		//fill all the neurons with their output values.
+		this.process(input);
+		
+		//compute the delta tensors for the output neurons
+		for(int i = 0; i < this.neuron_out_count; i++)
+		{
+			Tensor tmp = Tensor.invertMaxPooling(this.neuron_layers.get(this.neuron_layer_count-1).neuron_data[i], 
+												this.neuron_layers.get(this.neuron_layer_count-1).propagation_wideners[i], 
+												this.neuron_layers.get(this.neuron_layer_count-1).pooling_lengths);
+			this.neuron_layers.get(this.neuron_layer_count-1).delta_tensors[i] = Tensor.Hadamard(this.neuron_layers.get(this.neuron_layer_count-1).relu_derivative[i], Tensor.subtract(tmp, desired_output[i]));
+		}
+		
+		//compute the other delta tensors
+		Tensor sum, tmp;
+		for(int i = this.neuron_layer_count-2; i >= 0; i--)
+		{
+			for(int j = 0; j < this.neuron_layers.get(i).neuron_count; j++)
+			{
+				sum = new Tensor(this.neuron_layers.get(i).input_lengths);
+				for(int k = 0; k < this.neuron_layers.get(i+1).neuron_count; k++)
+				{
+					tmp = Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k],
+													this.neuron_layers.get(i+1).propagation_wideners[k],
+													this.neuron_layers.get(i+1).pooling_lengths);
+					tmp.convolveWith(Tensor.rot180(this.kernel_layers.get(i).kernels[j][k]));
+					sum = Tensor.add(sum, tmp);
+	
+				}
+				this.neuron_layers.get(i).delta_tensors[j] = Tensor.Hadamard(this.neuron_layers.get(i).relu_derivative[j], sum);
+			}
+		}
+	}
+	
+	//temporary. Dumps all network data to file
+	public void dumpData(String filename)
+	{
+		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")))
+		{
+			for(int i = 0; i < this.neuron_layer_count; i++)
+			{
+				for(int j = 0; j < this.neuron_layers.get(i).neuron_count; j++)
+				{
+					writer.write("o_"+i+"_"+j);
+					writer.newLine();
+					writer.newLine();
+				}
+			}
+		}catch(Exception e)
+		{
+			System.out.println(e.getStackTrace());
+		}
+	}
+	
 }
+
+
+
+

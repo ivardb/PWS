@@ -11,7 +11,7 @@ public class KernelLayer {
 	public int neuron_out_count;
 	
 	private int[] kernel_lengths;
-	private Tensor[][] kernels;
+	public Tensor[][] kernels;
 	
 	//kernels are generated randomly
 	public KernelLayer(int[] kernel_lengths, int neuron_in_count, int neuron_out_count, float lower, float upper) throws DimensionException

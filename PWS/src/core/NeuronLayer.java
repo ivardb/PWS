@@ -18,12 +18,17 @@ public class NeuronLayer {
 	public int[] input_lengths;
 	
 	//the exact pooling size
-	private int[] pooling_lengths;
+	public int[] pooling_lengths;
 	
 	//the exact output size
 	public int[] output_lengths;
 	
 	public Tensor[] neuron_data;
+	
+	//used in backpropagation
+	public Tensor[] propagation_wideners;
+	public Tensor[] delta_tensors;
+	public Tensor[] relu_derivative;
 	
 	//make sure all lengths are powers of 2, or an exception will be thrown
 	public NeuronLayer(int neuron_count, int[] input_lengths, int[] pooling_lengths) throws DimensionException, NumericalException
@@ -63,6 +68,9 @@ public class NeuronLayer {
 		}
 		
 		this.neuron_data = new Tensor[neuron_count];
+		this.propagation_wideners = new Tensor[neuron_count];
+		this.delta_tensors = new Tensor[neuron_count];
+		this.relu_derivative = new Tensor[neuron_count];
 	}
 	
 	//performs ReLu and pooling
@@ -86,8 +94,8 @@ public class NeuronLayer {
 		//perform ReLu and pooling. Try to reduce the dimension
 		for(int i = 0; i < this.neuron_count; i++)
 		{
-			neuron_data[i].ReLu();
-			neuron_data[i].maxPool(pooling_lengths);
+			this.relu_derivative[i] = neuron_data[i].ReLu();
+			this.propagation_wideners[i] = neuron_data[i].maxPool(pooling_lengths);
 			neuron_data[i].reduceDimension();
 		}
 	}

@@ -1,5 +1,6 @@
 package core;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import exceptions.*;
 
@@ -211,26 +212,12 @@ public class Tensor {
 	}
 	
 	//performs max pooling on the tensor, using a 'kernel' of the given size
-	public void maxPool(int... pooling_lengths) throws DimensionException
+	//returns a tensor of ones and zeroes used in the backpropagation algorithm
+	public Tensor maxPool(int... pooling_lengths) throws DimensionException
 	{		
 		if(pooling_lengths.length != this.dimension)
 		{
 			throw new DimensionException("dimensions don't match");
-		}
-		
-		//if the pooling 'kernel' is a single cell, nothing will happen and we might as well return
-		boolean trivial = true;
-		for(int length : pooling_lengths)
-		{
-			if(length != 1)
-			{
-				trivial = false;
-				break;
-			}
-		}
-		if(trivial)
-		{
-			return;
 		}
 		
 		//create a temporary tensor to hold the result
@@ -240,6 +227,9 @@ public class Tensor {
 			resulting_lengths[i] = (int)Math.ceil((double)this.lengths[i]/(double)pooling_lengths[i]);
 		}
 		Tensor result = new Tensor(resulting_lengths);
+		
+		//this tensor will be used in the backpropagation algorithm
+		Tensor propagation_widener = new Tensor(this.lengths);
 		
 		//initialize result indices
 		int[] indices = new int[this.dimension];
@@ -258,6 +248,7 @@ public class Tensor {
 		for(int i = 0; i < result.total_data_length; i++)
 		{
 			float max_value = 0.0f;
+			int[] max_indices = new int[this.dimension];
 			
 			//initialize pooling indices
 			int[] pooling_indices = new int[this.dimension];
@@ -283,7 +274,12 @@ public class Tensor {
 								
 				if(is_inside_tensor)
 				{
-					max_value = Math.max(max_value, this.get(total_indices));
+					float val = this.get(total_indices);
+					if(val > max_value)
+					{
+						max_value = val;
+						max_indices = total_indices;
+					}
 				}
 				
 				//update pooling indices
@@ -301,8 +297,11 @@ public class Tensor {
 			}
 			
 			result.set(max_value, indices);
+			propagation_widener.set(1, max_indices);
 			
 			//update result indices
+			if(this.dimension == 0)
+				break;
 			indices[0]++;
 			for(int j = 0; j < indices.length-1; j++)
 			{
@@ -315,6 +314,8 @@ public class Tensor {
 		}
 		
 		this.become(result);
+		
+		return propagation_widener;
 	}
 	
 	//performs the convolution operation on the tensor with given kernel as operator
@@ -410,16 +411,23 @@ public class Tensor {
 		this.become(result);											
 	}
 	
-	//rectified linear unit
-	public void ReLu()
+	//rectified linear unit. return value is used in backpropagation
+	public Tensor ReLu()
 	{
+		Tensor output = new Tensor(this.lengths);
+		
 		for(int i = 0; i < this.total_data_length; i++)
 		{
 			if(this.data[i] < 0)
 			{
 				this.data[i] = 0.0f;
 			}
+			else
+			{
+				output.data[i] = 1;
+			}
 		}
+		return output;
 	}
 	
 	//turn multidimensional indices into a single index in the serialized array
@@ -436,6 +444,136 @@ public class Tensor {
 			index += indices[i] * this.index_products[i];
 		}
 		return index;
+	}
+	
+	public static Tensor add(Tensor...tensors) throws Exception
+	{
+		//check for valid input
+		if(tensors.length == 0)
+			throw new Exception("addition needs at least one tensor");
+		
+		int[] lengths = tensors[0].lengths;
+		for(Tensor t : tensors)
+		{
+			if(!Arrays.equals(lengths, t.lengths))
+				throw new DimensionException("not all tensors are the same size!");
+		}
+		
+		Tensor result = new Tensor(lengths);
+		for(Tensor t : tensors)
+		{
+			for(int i = 0; i < result.total_data_length; i++)
+			{
+				result.data[i] += t.data[i];
+			}
+		}
+		return result;
+	}
+	
+	public static Tensor scalarMult(float val, Tensor tensor)
+	{
+		Tensor result = new Tensor(tensor.lengths);
+		for(int i = 0; i < tensor.total_data_length; i++)
+		{
+			result.data[i] = val*tensor.data[i];
+		}
+		return result;
+	}
+	
+	public static Tensor subtract(Tensor t1, Tensor t2) throws Exception
+	{
+		return add(t1,scalarMult(-1,t2));
+	}
+	
+	public static Tensor Hadamard(Tensor t1, Tensor t2) throws Exception
+	{
+		if(!Arrays.equals(t1.lengths, t2.lengths))
+			throw new DimensionException("The tensors must be of the same size!");
+	
+		Tensor result = new Tensor(t1.lengths);
+		for(int i = 0; i < result.total_data_length; i++)
+		{
+			result.data[i] = t1.data[i]*t2.data[i];
+		}
+		return result;
+	}
+	
+	public static Tensor invertMaxPooling(Tensor result, Tensor propagation_widener, int... pooling_lengths) throws DimensionException
+	{
+		//dimension/size check
+		if(result.dimension != propagation_widener.dimension || result.dimension != pooling_lengths.length)
+			throw new DimensionException("all inputs must be of the same dimension!");
+		
+		Tensor output = new Tensor(propagation_widener.lengths);
+		int[] indices = new int[propagation_widener.dimension];
+		for(int i = 0; i < indices.length; i++)
+		{
+			indices[i] = 0;
+		}
+		int[] pooled_indices = new int[propagation_widener.dimension];
+		
+		for(int i = 0; i < output.total_data_length; i++)
+		{
+			if(propagation_widener.get(indices) == 1)
+			{
+				for(int j = 0; j < propagation_widener.dimension; j++)
+				{
+					pooled_indices[j] = indices[j]/pooling_lengths[j];
+				}
+				output.set(result.get(pooled_indices), indices);
+			}
+			
+			//update indices
+			if(output.dimension == 0)
+				break;
+			indices[0]++;
+			for(int j = 0; j < output.dimension-1; j++)
+			{
+				if(indices[j] == output.lengths[j])
+				{
+					indices[j] = 0;
+					indices[j+1]++;
+				}
+			}
+		}
+		
+		return output;
+	}
+	
+	public static Tensor rot180(Tensor tensor) throws DimensionException
+	{
+		Tensor output = new Tensor(tensor.lengths);
+		
+		int[] indices = new int[tensor.dimension];
+		int[] mirrored_indices = new int[tensor.dimension];
+		for(int i = 0; i < tensor.dimension; i++)
+		{
+			indices[i] = 0;
+		}
+		
+		for(int i = 0; i < tensor.total_data_length; i++) 
+		{
+			for(int j = 0; j < tensor.dimension; j++)
+			{
+				mirrored_indices[j] = tensor.lengths[j] - indices[j] - 1; 
+			}
+			output.set(tensor.get(indices), mirrored_indices);
+			
+			//update indices
+			if(tensor.dimension == 0)
+				break;
+			indices[0]++;
+			for(int j = 0; j < tensor.dimension-1; j++)
+			{
+				if(indices[j] == tensor.lengths[j])
+				{
+					indices[j] = 0;
+					indices[j+1]++;
+				}
+			}
+		}
+		
+		return output;
 	}
 }
 
