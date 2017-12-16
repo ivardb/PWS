@@ -63,4 +63,8 @@ public class Training {
 		number_of_testsubjects = number;
 	}
 	
+	public void setNumberOfPictures(int number) {
+		number_of_pictures = number;
+	}
+	
 }
