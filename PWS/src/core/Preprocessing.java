@@ -7,10 +7,12 @@ import exceptions.DimensionException;
 
 public class Preprocessing 
 {	
-	private static final int IMAGE_WIDTH = 256;
+	//constants for picture size
+	private static final int IMAGE_WIDTH = 256;					
 	private static final int IMAGE_HEIGHT = 256;
 	
-	public static Tensor preproces(BufferedImage input_image) 
+	//scales and crops the image to the right size
+	public static Tensor preproces(BufferedImage input_image) 		
 	{
 		int width = input_image.getWidth();
 		int height = input_image.getHeight();
@@ -37,7 +39,8 @@ public class Preprocessing
 		return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
 	}
 	
-	private static BufferedImage scale(BufferedImage input_image, double scale)
+	//scales the picture
+	private static BufferedImage scale(BufferedImage input_image, double scale)			
 	{
 		AffineTransform at = new AffineTransform();
 		at.scale(scale, scale); 
@@ -46,6 +49,7 @@ public class Preprocessing
 		return input_image;
 	}
 	
+	//crops the picture
 	private static BufferedImage crop(BufferedImage input_image, int start_x, int start_y, int width, int height) 
 	{
 		BufferedImage output_img = input_image.getSubimage(start_x, start_y, width, height);
