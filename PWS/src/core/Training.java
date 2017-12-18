@@ -86,8 +86,5 @@ public class Training {
 	public void setNumberOfPictures(int number) {
 		number_of_pictures = number;
 	}
-		
-	public void setDatabasePath(String path) {
-		image_path = path;
-	}
+
 }
