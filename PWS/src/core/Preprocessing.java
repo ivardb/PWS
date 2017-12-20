@@ -3,8 +3,6 @@ package core;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
-import exceptions.DimensionException;
-
 public class Preprocessing 
 {	
 	//constants for picture size
