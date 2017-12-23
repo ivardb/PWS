@@ -26,7 +26,7 @@ public class ConvolutionalNeuralNetwork {
 	public ArrayList<NeuronLayer> neuron_layers;
 	public ArrayList<KernelLayer> kernel_layers; 
 	
-	private int neuron_layer_count;
+	public int neuron_layer_count;
 	private int kernel_layer_count;
 	
 	private int neuron_in_count;
@@ -199,10 +199,38 @@ public class ConvolutionalNeuralNetwork {
 				for(int k = 0; k < this.kernel_layers.get(i).neuron_out_count; k++)
 				{
 					derivative = Tensor.Hadamard(this.neuron_layers.get(i).neuron_data[j], this.neuron_layers.get(i+1).delta_tensors[k]);
-					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k],Tensor.scalarMult(learning_rate, derivative));
+					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k],Tensor.scalarMult(-learning_rate, derivative));
 				}
 			}
 		}
+	}
+
+	public String toString()
+	{
+		String str = "";
+
+		/*first, a header specifying the structure. 
+		Every line represents another neuron layer. 
+		In the comma separated list, we first have the amount of neurons in that layer and then the dimension of the input.
+		After that, the input lengths and pooling lengths follow.*/
+		for(int i = 0; i < this.neuron_layer_count; i++)
+		{
+			str += this.neuron_layers.get(i).neuron_count+","+this.neuron_layers.get(i).dimension_in+",";
+			for(int j = 0; j < this.neuron_layers.get(i).dimension_in; j++)
+			{
+				str += this.neuron_layers.get(i).input_lengths[j]+",";
+			}
+			for(int j = 0; j < this.neuron_layers.get(i).dimension_in; j++)
+			{
+				str += this.neuron_layers.get(i).pooling_lengths[j];
+			}
+			str += "\n";
+		}
+		
+		//now, an empty line signifies the end of the header
+		str += "\nt";
+		
+		return str;
 	}
 }
 

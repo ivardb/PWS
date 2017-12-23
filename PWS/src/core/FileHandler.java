@@ -10,10 +10,9 @@ public class FileHandler {
 public final static int picture_width = 256;
 public final static int picture_height = 256;
 
-	public static void saveParameters(String file_path, String file_content) 
+public static void writeToFile(String file_path, String file_content) 
 	{
 		// Writing content
-				
 		try {
 			FileWriter f_writer = new FileWriter(file_path);
 			BufferedWriter b_writer = new BufferedWriter(f_writer);
@@ -24,7 +23,7 @@ public final static int picture_height = 256;
 			}
 	}
 	
-	public static String loadParameters(String file_path) 
+	public static String readFromFile(String file_path) 
 	{
 		//get file contents in a string
 		String file_content = null;

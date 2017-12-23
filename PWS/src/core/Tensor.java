@@ -133,7 +133,7 @@ public class Tensor {
 			{
 				sum += this.data[depth*i + j];
 			}
-			tmp.data[i] = sum / depth;
+			tmp.data[i] = sum;// / depth;
 		}
 		
 		this.become(tmp);
