@@ -1,5 +1,7 @@
 package core;
 
+import java.util.Arrays;
+
 import exceptions.DimensionException;
 
 //work in progress
@@ -59,7 +61,7 @@ public class KernelLayer {
 			{
 				if(kernels[i][j].dimension != this.dimension)
 					throw new DimensionException("Not all tensors are of the same dimension.");
-				else if(!(kernels[i][j].lengths.equals(this.kernel_lengths) || this.dimension == 0))
+				else if(!(Arrays.equals(kernels[i][j].lengths, this.kernel_lengths) || this.dimension == 0))
 					throw new DimensionException("Not all kernels are of the same size.");
 			}
 		}

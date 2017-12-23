@@ -192,7 +192,7 @@ public class Tensor {
 			}
 			
 			//copy
-			result.set(this.get(), indices);
+			result.set(this.get(old_indices), indices);
 			
 			//update indices
 			if(indices.length == 0)
@@ -328,12 +328,7 @@ public class Tensor {
 		}
 		
 		//create a temporary tensor to hold the result
-		int[] resulting_lengths = new int[this.dimension];
-		for(int i = 0; i < this.dimension; i++)
-		{
-			resulting_lengths[i] = this.lengths[i];
-		}
-		Tensor result = new Tensor(resulting_lengths);
+		Tensor result = new Tensor(this.lengths);
 		
 		//holds the 'coordinate' of the cell
 		int[] indices = new int[this.dimension];							
@@ -364,8 +359,8 @@ public class Tensor {
 				int[] value_indices = new int[this.dimension];				
 				for(int i = 0; i < this.dimension; i++)
 				{
-					value_indices[i] = indices[i] + kernel_indices[i];
-					if(value_indices[i] >= this.lengths[i])
+					value_indices[i] = indices[i] - kernel.lengths[i] + 1 + kernel_indices[i];
+					if(value_indices[i] >= this.lengths[i] || value_indices[i] < 0)
 					{
 						is_inside_tensor = false;
 					}

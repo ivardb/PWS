@@ -70,7 +70,7 @@ public class ConvolutionalNeuralNetwork {
 			//the output of the previous layer is of a different dimension than the input of the layer we want to add
 			return DIMENSION_ERROR;
 		}
-		else if(!(this.output_lengths.equals(layer.input_lengths) || this.dimension_in == 0) || this.neuron_out_count != layer.neuron_count)
+		else if(!(Arrays.equals(this.output_lengths, layer.input_lengths) || this.dimension_in == 0) || this.neuron_out_count != layer.neuron_count)
 		{
 			//the output of the previous layer is of a different size than the input of the layer we want to add
 			return SIZE_ERROR;
@@ -228,7 +228,7 @@ public class ConvolutionalNeuralNetwork {
 		}
 		
 		//now, an empty line signifies the end of the header
-		str += "\nt";
+		str += "\n";
 		
 		return str;
 	}

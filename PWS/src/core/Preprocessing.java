@@ -10,23 +10,23 @@ public class Preprocessing
 	private static final int IMAGE_HEIGHT = 256;
 	
 	//scales and crops the image to the right size
-	public static Tensor preproces(BufferedImage input_image) 		
+	public static Tensor[] preprocess(BufferedImage input_image) 		
 	{
 		int width = input_image.getWidth();
 		int height = input_image.getHeight();
-		if(width/height > IMAGE_WIDTH / IMAGE_HEIGHT)
+		if((double)width/height > (double)IMAGE_WIDTH / IMAGE_HEIGHT)
 		{
 			//too wide
-			double scale = IMAGE_HEIGHT/height;
+			double scale = (double)IMAGE_HEIGHT/height;
 			input_image = scale(input_image, scale);
 			width = input_image.getWidth();
 			int x_begin = (width - IMAGE_WIDTH)/2;
 			input_image = crop(input_image, x_begin, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
-		else if(width/height < IMAGE_WIDTH / IMAGE_HEIGHT)
+		else if((double)width/height < (double)IMAGE_WIDTH / IMAGE_HEIGHT)
 		{
 			//too small
-			double scale = IMAGE_WIDTH/width;
+			double scale = (double)IMAGE_WIDTH/width;
 			input_image = scale(input_image,scale);
 			height = input_image.getHeight();
 			int y_begin = (height - IMAGE_WIDTH)/2;
@@ -34,7 +34,19 @@ public class Preprocessing
 		}
 		float[] pixels = ((DataBufferFloat)input_image.getRaster().getDataBuffer()).getData();
 		
-		return new Tensor(pixels, input_image.getWidth(), input_image.getHeight(), 3);
+		//convert the image to three tensors (red, green and blue)
+		Tensor[] output = new Tensor[3];
+		float[] tmp = new float[pixels.length/3];
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < tmp.length; j++)
+			{
+				tmp[j] = pixels[3*j+i];
+			}
+			output[i] = new Tensor(tmp, input_image.getWidth(), input_image.getHeight());
+		}
+		
+		return output;
 	}
 	
 	//scales the picture

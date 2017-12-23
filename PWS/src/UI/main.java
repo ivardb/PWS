@@ -8,8 +8,47 @@ public class main {
 
 	public static void main(String[] args) 
 	{
-		//test code which determines the language (using the custom testing class)
+		//first multidimensional test
 		try
+		{
+			NeuronLayer neuron_layer1 = new NeuronLayer(3, new int[] {2,2}, new int[] {1,1});
+			NeuronLayer neuron_layer2 = new NeuronLayer(2, new int[] {2,2}, new int[] {2,2});
+			NeuronLayer neuron_layer3 = new NeuronLayer(1, new int[] {}, new int[] {});
+			
+			Tensor[][] layer1_weights = new Tensor[][] {
+				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)},
+				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)},
+				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)}
+			};
+			KernelLayer kernel_layer1 = new KernelLayer(layer1_weights);
+			
+			Tensor[][] layer2_weights = new Tensor[][] {
+				new Tensor[] {new Tensor(new float[] {1})},
+				new Tensor[] {new Tensor(new float[] {1})}
+			};
+			KernelLayer kernel_layer2 = new KernelLayer(layer2_weights);
+			
+			ConvolutionalNeuralNetwork conv_net = new ConvolutionalNeuralNetwork(neuron_layer1);
+			conv_net.addKernelLayer(kernel_layer1);
+			conv_net.addNeuronLayer(neuron_layer2);
+			conv_net.addKernelLayer(kernel_layer2);
+			conv_net.addNeuronLayer(neuron_layer3);
+			
+			Tensor[] input = new Tensor[] {
+					new Tensor(new float[] {1,1,1,1},2,2),
+					new Tensor(new float[] {1,1,1,1},2,2),
+					new Tensor(new float[] {1,1,1,1},2,2)
+			};
+			conv_net.process(input);
+			System.out.println(conv_net.neuron_layers.get(1).neuron_data[0].getSerializedData()[0]);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		//test code which determines the language (using the custom testing class)
+		/*try
 		{
 			//create neuron layers
 			NeuronLayer neuron_layer1 = new NeuronLayer(26, new int[] {}, new int[] {});
@@ -103,12 +142,12 @@ public class main {
 					count++;
 				}
 			}
-			System.out.println(count);*/
+			System.out.println(count);
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
-		}
+		}*/
 	}
 
 }

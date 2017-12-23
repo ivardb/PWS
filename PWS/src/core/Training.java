@@ -5,39 +5,45 @@ import java.util.Random;
 
 public class Training {
 	
-	private int number_of_testsubjects = 50; 
-	private int number_of_pictures = 15; 				//the amount of pictures per person
-	private String image_path = "F:\\Fotos_AI\\gt_db";
-	Random random = new Random();
+	private static int number_of_testsubjects = 50; 
+	private static int number_of_pictures = 15; 				//the amount of pictures per person
+	private static String image_path = "F:\\Fotos_AI\\gt_db";
+	private static Random random = new Random();
 	
-	public void Train(int amount_of_runs) {
+	public static void train(int amount_of_runs) {
 		int subject = random.nextInt(number_of_testsubjects) + 1;
 		int train_subject;
-		String strSubject;
-		String strTrain_subject;
+		String str_subject;
+		String str_train_subject;
 		
 		for(int i = 0; i<amount_of_runs; i++) {  
-			if(random.nextInt(2) == 1) {			//determine if 2 pictures of the same subject wiil be chosen
+			if(random.nextInt(2) == 1) {			//determine if 2 pictures of the same subject will be chosen
 				train_subject = subject;			// or if pictures from two different subjects are chosen
 			} else {
 				train_subject = -1;
 			}
 			if(subject < 10 && subject!=-1) {		//changes number to a proper syntax for our files
-				strSubject = "0" + subject;
+				str_subject = "0" + subject;
 			} else {
-				strSubject = Integer.toString(subject);
+				str_subject = Integer.toString(subject);
 			}
 			
 			if(train_subject < 10 && train_subject != -1) {
-				strTrain_subject = "0" + train_subject;
+				str_train_subject = "0" + train_subject;
 			} else {
-				strTrain_subject = Integer.toString(train_subject);
+				str_train_subject = Integer.toString(train_subject);
 			}
 			
-			String first_path = getNextPath(strSubject);			//gets paths for our files and converts them to tensors
-			String second_path = getNextPath(strTrain_subject);
-			Tensor first_tensor = loadTrainingset(first_path);
-			Tensor second_tensor = loadTrainingset(second_path);
+			//ik dacht dat er een foutje in jouw code gevonden had en schreef de twee onderstaande regels als vervanging
+			//het bleek dat er toch geen fout in zat, maar ik heb ze als suggestie toch maar laten staan. -Maarten
+		
+			//strSubject = subject < 10 ? "0"+subject : Integer.toString(subject);
+			//strTrain_subject = random.nextBoolean()==true ? strSubject : "";
+			
+			String first_path = getNextPath(str_subject);			//gets paths for our files and converts them to tensors
+			String second_path = getNextPath(str_train_subject);
+			Tensor[] first_tensor = loadTrainingset(first_path);
+			Tensor[] second_tensor = loadTrainingset(second_path);
 			
 			//insert code for running a tensor through ai and back propagation
 			
@@ -49,13 +55,13 @@ public class Training {
 		}
 	}
 	
-	private Tensor loadTrainingset(String path) {							//converts a picture path to a tensor of that picture
+	private static Tensor[] loadTrainingset(String path) {							//converts a picture path to a tensor of that picture
 		BufferedImage loaded_image = FileHandler.loadImage(path);
-		Tensor loaded_tensor = Preprocessing.preproces(loaded_image);
+		Tensor[] loaded_tensor = Preprocessing.preprocess(loaded_image);
 		return loaded_tensor;
 	}
 	
-	private String getNextPath(String subject) {							//determines a path for a given or random subject
+	private static String getNextPath(String subject) {							//determines a path for a given or random subject
 		String picture_string;
 		
 		if(subject == "" || subject == "-1") {
@@ -75,15 +81,15 @@ public class Training {
 		return output;
 	}
 	
-	public void setImagePath(String path) {						//setters for the different variables
+	public static void setImagePath(String path) {						//setters for the different variables
 		image_path = path;
 	}
 	
-	public void setNumberOfTestsubjects(int number) {
+	public static void setNumberOfTestsubjects(int number) {
 		number_of_testsubjects = number;
 	}
 	
-	public void setNumberOfPictures(int number) {
+	public static void setNumberOfPictures(int number) {
 		number_of_pictures = number;
 	}
 
