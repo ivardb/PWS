@@ -9,19 +9,6 @@ public class main {
 	public static void main(String[] args) 
 	{
 		//test code:
-		
-		/*try 
-		{
-			Tensor t1 = new Tensor(new float[] {1,2,3,4},2,2);
-			Tensor t2 = t1.maxPool(2,2);
-			Tensor t3 = Tensor.invertMaxPooling(t1, t2, 2, 2);
-			System.out.println(t3.getSerializedData()[3]);
-		} 
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}*/
-		
 		try 
 		{
 			//create neuron layers
@@ -59,9 +46,29 @@ public class main {
 					new Tensor(new float[] {1.0f})
 			};
 			
-			//System.out.println(conv_net.process(input)[0].getSerializedData()[0]);
-			conv_net.backpropagate(input, new Tensor[] {new Tensor(new float[] {1.5f}), new Tensor(new float[] {1.5f})});
-			conv_net.dumpData("convnetdata.txt");
+			conv_net.backpropagate(input, new Tensor[] {new Tensor(new float[] {0.8f}), new Tensor(new float[] {1.6f})}, 0.1f);
+			
+			/*for(NeuronLayer nl : conv_net.neuron_layers)
+			{
+				for(int j = 0; j < nl.neuron_count; j++)
+				{
+					System.out.print("("+nl.neuron_data[j].getSerializedData()[0]+", "+nl.delta_tensors[j].getSerializedData()[0]+"), ");
+				}
+				System.out.println("");
+			}*/
+			
+			for(KernelLayer kn : conv_net.kernel_layers)
+			{
+				for(int i = 0; i < kn.neuron_in_count; i++)
+				{
+					for(int j = 0; j < kn.neuron_out_count; j++)
+					{
+						System.out.print("("+i+", "+j+", "+kn.kernels[i][j].getSerializedData()[0]+")");
+					}
+					System.out.println("");
+				}
+				System.out.println("");
+			}
 		} 
 		catch (Exception e) 
 		{

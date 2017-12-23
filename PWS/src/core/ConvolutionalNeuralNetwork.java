@@ -23,8 +23,8 @@ public class ConvolutionalNeuralNetwork {
 	public static final int SIZE_ERROR = 3;
 	public static final int DIMENSION_ERROR = 4;
 	
-	private ArrayList<NeuronLayer> neuron_layers;
-	private ArrayList<KernelLayer> kernel_layers; 
+	public ArrayList<NeuronLayer> neuron_layers;
+	public ArrayList<KernelLayer> kernel_layers; 
 	
 	private int neuron_layer_count;
 	private int kernel_layer_count;
@@ -156,7 +156,7 @@ public class ConvolutionalNeuralNetwork {
 	}
 	
 	//generalized backpropagation algorithm
-	public void backpropagate(Tensor[] input, Tensor[] desired_output) throws Exception
+	public void backpropagate(Tensor[] input, Tensor[] desired_output, float learning_rate) throws Exception
 	{
 		//fill all the neurons with their output values.
 		this.process(input);
@@ -189,28 +189,21 @@ public class ConvolutionalNeuralNetwork {
 				this.neuron_layers.get(i).delta_tensors[j] = Tensor.Hadamard(this.neuron_layers.get(i).relu_derivative[j], sum);
 			}
 		}
-	}
-	
-	//temporary. Dumps all network data to file
-	public void dumpData(String filename)
-	{
-		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")))
+		
+		//update the weights
+		Tensor derivative;
+		for(int i = 0; i < this.kernel_layer_count; i++)
 		{
-			for(int i = 0; i < this.neuron_layer_count; i++)
+			for(int j = 0; j < this.kernel_layers.get(i).neuron_in_count; j++)
 			{
-				for(int j = 0; j < this.neuron_layers.get(i).neuron_count; j++)
+				for(int k = 0; k < this.kernel_layers.get(i).neuron_out_count; k++)
 				{
-					writer.write("o_"+i+"_"+j);
-					writer.newLine();
-					writer.newLine();
+					derivative = Tensor.Hadamard(this.neuron_layers.get(i).neuron_data[j], this.neuron_layers.get(i+1).delta_tensors[k]);
+					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k],Tensor.scalarMult(learning_rate, derivative));
 				}
 			}
-		}catch(Exception e)
-		{
-			System.out.println(e.getStackTrace());
 		}
 	}
-	
 }
 
 
