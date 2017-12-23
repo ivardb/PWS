@@ -90,7 +90,6 @@ public class NeuronLayer {
 			neuron_data[i] = new Tensor(this.input_lengths);
 			neuron_data[i].become(input[i]);
 		}
-		
 		//perform ReLu and pooling. Try to reduce the dimension
 		for(int i = 0; i < this.neuron_count; i++)
 		{

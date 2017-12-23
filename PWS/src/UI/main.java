@@ -49,7 +49,7 @@ public class main {
 			conv_net.addKernelLayer(kernel_layer2);
 			conv_net.addNeuronLayer(neuron_layer3);
 			
-			System.out.println(conv_net.toString());
+			ConvolutionalNeuralNetwork.fromString(ConvolutionalNeuralNetwork.toString(conv_net));
 			
 			//run an initial performance test on the network with randomized weights
 			/*Tensor[][] pair;
