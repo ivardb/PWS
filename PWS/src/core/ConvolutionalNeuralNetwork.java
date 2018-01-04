@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import exceptions.DimensionException;
+import exceptions.NumericalException;
+
 //work in progress
 public class ConvolutionalNeuralNetwork {
 
@@ -205,7 +208,7 @@ public class ConvolutionalNeuralNetwork {
 		}
 	}
 
-	public String toString()
+	public static String toString(ConvolutionalNeuralNetwork net)
 	{
 		String str = "";
 
@@ -213,25 +216,113 @@ public class ConvolutionalNeuralNetwork {
 		Every line represents another neuron layer. 
 		In the comma separated list, we first have the amount of neurons in that layer and then the dimension of the input.
 		After that, the input lengths and pooling lengths follow.*/
-		for(int i = 0; i < this.neuron_layer_count; i++)
+		for(int i = 0; i < net.neuron_layer_count; i++)
 		{
-			str += this.neuron_layers.get(i).neuron_count+","+this.neuron_layers.get(i).dimension_in+",";
-			for(int j = 0; j < this.neuron_layers.get(i).dimension_in; j++)
+			str += net.neuron_layers.get(i).neuron_count+",";
+			for(int j = 0; j <  net.neuron_layers.get(i).dimension_in; j++)
 			{
-				str += this.neuron_layers.get(i).input_lengths[j]+",";
+				str += net.neuron_layers.get(i).input_lengths[j]+",";
 			}
-			for(int j = 0; j < this.neuron_layers.get(i).dimension_in; j++)
+			for(int j = 0; j < net.neuron_layers.get(i).dimension_in; j++)
 			{
-				str += this.neuron_layers.get(i).pooling_lengths[j];
+				str += net.neuron_layers.get(i).pooling_lengths[j];
 			}
 			str += "\n";
 		}
-		
 		//now, an empty line signifies the end of the header
 		str += "\n";
 		
+		//adding all the weights to the string
+		float[] values; 
+		for(int i = 0; i < net.kernel_layer_count; i++)
+		{	
+			for(int j = 0; j < net.neuron_layers.get(i).neuron_count; j++)
+			{
+				for(int k = 0; k < net.neuron_layers.get(i+1).neuron_count; k++)
+				{
+					values = net.kernel_layers.get(i).kernels[j][k].getSerializedData();
+					for(int l = 0; l < values.length; l++)
+					{
+						str += Float.toString(values[l]);
+						str += ",";
+					}
+					str += "\n";
+				}
+				
+			}	
+		}
 		return str;
 	}
+	
+	public static ConvolutionalNeuralNetwork fromString(String parameters) throws DimensionException, NumericalException
+	{
+	    // splitting the string into lines
+		String[] values = parameters.split("\n");
+	    System.out.println(values.length);
+	    
+	    // separating the header from the weights
+	    int header_index = 0;
+	    for(int i = 0; i < values.length; i++)
+	    {	
+	    	if(values[i] == "")
+	    	{
+	    		header_index = i;
+	    	}
+	    }
+	    String[] string_header = new String[header_index];
+	    for(int i = 0; i < header_index; i++)
+	    {
+	    	string_header[i] = values[i];
+	    }
+	    int[][] header = new int[string_header.length][];
+	    String[] tmp;
+	    for(int i = 0; i < string_header.length; i++)
+	    {
+	    	tmp = string_header[i].split(",");
+	    	header[i] = new int[tmp.length];
+	    	for(int j = 0; j < tmp.length; j++)
+	    	{
+	    		header[i][j] = Integer.parseInt(tmp[j]);
+	    	}
+	    }
+	    
+	    //create neuron layers
+	    NeuronLayer[] neuron_layers = new NeuronLayer[header.length];
+	    int[] input_lengths;
+	    int[] pooling_lengths;
+	    for(int i = 0; i < header.length; i++)
+	    {
+	    	input_lengths = new int[header[i].length/2];
+	    	pooling_lengths = new int[header[i].length/2];
+	    	for(int j = 1; j < (header[i].length+1)/2; j++)
+	    	{
+	    		input_lengths[j] = header[i][1+j];
+	    		pooling_lengths[j] = header[i][(header[i].length+1)/2 + j];
+	    	}
+	    	neuron_layers[i] = new NeuronLayer(header[i][0], input_lengths, pooling_lengths);
+	    }
+	    
+	    // separating weights from the header
+	    String[] string_weights = new String[values.length - header_index];
+	    int number_of_kernel_layers = header_index - 1;
+	    for(int i = header_index; i < values.length; i++)
+	    {
+	    	string_weights[i] = values[i];
+	    }
+	    for(int i = 0; i < number_of_kernel_layers; i++)
+	    {
+	    	for(int j = 0; j < header[i][0] * header[i+1][0]; i++)
+	    	{
+	    		
+	    	}
+	    		
+	    }
+	    	
+	    
+	    
+		return null;
+	}
+
 }
 
 
