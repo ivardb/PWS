@@ -89,7 +89,7 @@ public class KernelLayer {
 		{
 			temp_tensors = new Tensor[this.neuron_in_count];
 			for(int j = 0; j < this.neuron_in_count; j++)
-			{				
+			{
 				temp_tensors[j] = new Tensor();
 				temp_tensors[j].become(input_data[j]);
 				temp_tensors[j].convolveWith(this.kernels[j][i]);

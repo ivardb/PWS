@@ -65,7 +65,7 @@ public class ConvolutionalNeuralNetwork {
 		//check if the new layer 'fits' on the network
 		if(neuron_layer_count - kernel_layer_count >= 1)
 		{
-			//the last layer is already a kernel layer
+			//the last layer is already a neuron layer
 			return APPEND_ERROR;
 		}
 		else if(layer.dimension_in != this.dimension_out)

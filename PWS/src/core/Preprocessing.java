@@ -1,7 +1,12 @@
 package core;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.io.ByteArrayOutputStream;
+
+import javax.imageio.ImageIO;
 
 public class Preprocessing 
 {	
@@ -32,7 +37,8 @@ public class Preprocessing
 			int y_begin = (height - IMAGE_WIDTH)/2;
 			input_image = crop(input_image, 0, y_begin, IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
-		float[] pixels = ((DataBufferFloat)input_image.getRaster().getDataBuffer()).getData();
+		
+		byte[] pixels = ((DataBufferByte)input_image.getRaster().getDataBuffer()).getData();
 		
 		//convert the image to three tensors (red, green and blue)
 		Tensor[] output = new Tensor[3];
@@ -41,7 +47,7 @@ public class Preprocessing
 		{
 			for(int j = 0; j < tmp.length; j++)
 			{
-				tmp[j] = pixels[3*j+i];
+				tmp[j] = (float)pixels[3*j+i];
 			}
 			output[i] = new Tensor(tmp, input_image.getWidth(), input_image.getHeight());
 		}
@@ -52,17 +58,29 @@ public class Preprocessing
 	//scales the picture
 	private static BufferedImage scale(BufferedImage input_image, double scale)			
 	{
-		AffineTransform at = new AffineTransform();
-		at.scale(scale, scale); 
-		AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-		input_image = op.filter(input_image, null);
-		return input_image;
+		int new_width = (int)(input_image.getWidth()*scale);
+		int new_height = (int)(input_image.getHeight()*scale);
+		
+		Image tmp = input_image.getScaledInstance(new_width, new_height, Image.SCALE_SMOOTH);
+		BufferedImage new_img = new BufferedImage(new_width, new_height, BufferedImage.TYPE_3BYTE_BGR);
+		
+		Graphics2D g2d = new_img.createGraphics();
+		g2d.drawImage(tmp, 0, 0, null);
+		g2d.dispose();
+		
+		return new_img;
 	}
 	
 	//crops the picture
 	private static BufferedImage crop(BufferedImage input_image, int start_x, int start_y, int width, int height) 
 	{
-		BufferedImage output_img = input_image.getSubimage(start_x, start_y, width, height);
-		return output_img;
+		Image tmp = input_image.getSubimage(start_x, start_y, width, height);
+		BufferedImage output_image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+		
+		Graphics2D g2d = output_image.createGraphics();
+		g2d.drawImage(tmp, 0, 0, null);
+		g2d.dispose();
+		
+		return output_image;
 	}
 }

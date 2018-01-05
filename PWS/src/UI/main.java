@@ -8,25 +8,77 @@ public class main {
 
 	public static void main(String[] args) 
 	{
-		//first multidimensional test
+		//Optical Character Recognition test.
 		try
+		{
+			//the first layer will take in 3 Tensors, each 2-dimensional and of size 256x256, representing the R, G and B components.
+			NeuronLayer neuron_layer1 = new NeuronLayer(3, new int[] {256,256}, new int[] {1,1});
+			
+			//create the other neuron layers
+			NeuronLayer neuron_layer2 = new NeuronLayer(10, new int[] {256,256}, new int[] {4,4});
+			NeuronLayer neuron_layer3 = new NeuronLayer(10, new int[] {64,64}, new int[] {4,4});
+			NeuronLayer neuron_layer4 = new NeuronLayer(10, new int[] {16,16}, new int[] {4,4});
+			NeuronLayer neuron_layer5 = new NeuronLayer(10, new int[] {4,4}, new int[] {4,4});
+			NeuronLayer neuron_layer6 = new NeuronLayer(10, new int[] {}, new int[] {});
+			
+			//create all appropriate kernel layers
+			KernelLayer kernel_layer1 = new KernelLayer(new int[] {4,4}, 3, 10, -1.0f, 1.0f);
+			KernelLayer kernel_layer2 = new KernelLayer(new int[] {4,4}, 10, 10, -1.0f, 1.0f);
+			KernelLayer kernel_layer3 = new KernelLayer(new int[] {4,4}, 10,10,-1.0f, 1.0f);
+			KernelLayer kernel_layer4 = new KernelLayer(new int[] {4,4},10,10,-1.0f, 1.0f);
+			KernelLayer kernel_layer5 = new KernelLayer(new int[] {}, 10,10,-1.0f, 1.0f);
+			
+			//build the convolutional neural network
+			ConvolutionalNeuralNetwork conv_net = new ConvolutionalNeuralNetwork(neuron_layer1);
+			conv_net.addKernelLayer(kernel_layer1);
+			conv_net.addNeuronLayer(neuron_layer2);
+			conv_net.addKernelLayer(kernel_layer2);
+			conv_net.addNeuronLayer(neuron_layer3);
+			conv_net.addKernelLayer(kernel_layer3);
+			conv_net.addNeuronLayer(neuron_layer4);
+			conv_net.addKernelLayer(kernel_layer4);
+			conv_net.addNeuronLayer(neuron_layer5);
+			conv_net.addKernelLayer(kernel_layer5);
+			conv_net.addNeuronLayer(neuron_layer6);
+			
+			if(conv_net.neuron_layer_count == 6)
+			{
+				System.out.println("The neural network has successfully been initialized.");
+			}
+			else
+			{
+				System.out.println("Error encounterd during network intitialization. Shutting down.");
+				return;
+			}
+			
+			try
+			{
+				long start_time = System.nanoTime();
+				Tensor[][] pair = Testing.getRandomClassifiedDigits();
+				conv_net.process(pair[0]);
+				long end_time = System.nanoTime();
+				System.out.println("Test run succesful in "+(float)(end_time-start_time)/1000000000 +" seconds. Preparing main training stage...");
+			}
+			catch(Exception e)
+			{
+				System.out.println("Error encountered during first test run: "+e.getMessage());
+			}
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		//first multidimensional test
+		/*try
 		{
 			NeuronLayer neuron_layer1 = new NeuronLayer(3, new int[] {2,2}, new int[] {1,1});
 			NeuronLayer neuron_layer2 = new NeuronLayer(2, new int[] {2,2}, new int[] {2,2});
 			NeuronLayer neuron_layer3 = new NeuronLayer(1, new int[] {}, new int[] {});
-			
-			Tensor[][] layer1_weights = new Tensor[][] {
-				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)},
-				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)},
-				new Tensor[] {new Tensor(new float[] {1,1,1,1},2,2), new Tensor(new float[] {1,1,1,1},2,2)}
-			};
-			KernelLayer kernel_layer1 = new KernelLayer(layer1_weights);
-			
-			Tensor[][] layer2_weights = new Tensor[][] {
-				new Tensor[] {new Tensor(new float[] {1})},
-				new Tensor[] {new Tensor(new float[] {1})}
-			};
-			KernelLayer kernel_layer2 = new KernelLayer(layer2_weights);
+		
+			KernelLayer kernel_layer1 = new KernelLayer(new int[] {2,2}, 3,2,-1.0f, 1.0f);
+			KernelLayer kernel_layer2 = new KernelLayer(new int[] {2,2}, 2,1,-1.0f, 1.0f);
 			
 			ConvolutionalNeuralNetwork conv_net = new ConvolutionalNeuralNetwork(neuron_layer1);
 			conv_net.addKernelLayer(kernel_layer1);
@@ -45,7 +97,7 @@ public class main {
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}
+		}*/
 		
 		//test code which determines the language (using the custom testing class)
 		/*try

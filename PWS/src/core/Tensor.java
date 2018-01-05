@@ -6,6 +6,8 @@ import exceptions.*;
 
 public class Tensor {
 
+	public static int convolution_count = 0;
+	
 	public int dimension; //the dimension of the Tensor
 	public int[] lengths; //the different 'lengths' of the tensor
 	
@@ -337,7 +339,6 @@ public class Tensor {
 			//start the iteration in the 'top-left corner'
 			indices[i] = 0;													
 		}
-		
 		for(int index = 0; index < result.total_data_length; index++)
 		{
 			//this variable holds the result of applying the convolution operation to a single cell
@@ -403,7 +404,7 @@ public class Tensor {
 			}
 		}
 		
-		this.become(result);											
+		this.become(result);
 	}
 	
 	//rectified linear unit. return value is used in backpropagation

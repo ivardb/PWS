@@ -40,7 +40,7 @@ public static void writeToFile(String file_path, String file_content)
 		//create a buffered image from a given file
 		
 		File img = new File(img_path);
-		BufferedImage image = new BufferedImage(picture_width, picture_height, BufferedImage.TYPE_INT_BGR);
+		BufferedImage image = new BufferedImage(picture_width, picture_height, BufferedImage.TYPE_3BYTE_BGR);
 		try {
 			image = ImageIO.read(img);
 		} catch (IOException e) {
