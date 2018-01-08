@@ -12,7 +12,7 @@ public class KernelLayer {
 	public int neuron_in_count;
 	public int neuron_out_count;
 	
-	private int[] kernel_lengths;
+	public int[] kernel_lengths;
 	public Tensor[][] kernels;
 	
 	//kernels are generated randomly

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -158,42 +159,63 @@ public class ConvolutionalNeuralNetwork {
 		return this.neuron_layers.get(this.neuron_layer_count-1).neuron_data;
 	}
 	
-	//generalized backpropagation algorithm
-	public void backpropagate(Tensor[] input, Tensor[] desired_output, float learning_rate) throws Exception
+	public void computeLastLayerDeltas(Tensor[][] inputs, Tensor[][] desired_outputs) throws Exception
 	{
-		//fill all the neurons with their output values.
-		this.process(input);
-		
-		//compute the delta tensors for the output neurons
-		for(int i = 0; i < this.neuron_out_count; i++)
+		if(inputs.length != desired_outputs.length)
 		{
-			Tensor tmp = Tensor.invertMaxPooling(this.neuron_layers.get(this.neuron_layer_count-1).neuron_data[i], 
-												this.neuron_layers.get(this.neuron_layer_count-1).propagation_wideners[i], 
-												this.neuron_layers.get(this.neuron_layer_count-1).pooling_lengths);
-			this.neuron_layers.get(this.neuron_layer_count-1).delta_tensors[i] = Tensor.Hadamard(this.neuron_layers.get(this.neuron_layer_count-1).relu_derivative[i], Tensor.subtract(tmp, desired_output[i]));
+			throw new Exception("Need the same number of inputs as desired outputs!");
 		}
 		
-		//compute the other delta tensors
-		Tensor sum, tmp;
+		Tensor[] differences = new Tensor[this.neuron_out_count];
+		for(int i = 0; i < this.neuron_out_count; i++) 
+		{
+			differences[i] = new Tensor(this.output_lengths);
+		}
+		
+		for(int i = 0; i < inputs.length; i++)
+		{
+			//set neurons to the correct values
+			this.process(inputs[i]);
+			
+			for(int j = 0; j < this.neuron_out_count; j++) 
+			{
+				differences[j] = Tensor.add(differences[j], Tensor.Hadamard(Tensor.subtract(this.neuron_layers.get(this.neuron_layer_count-1).neuron_data[j], desired_outputs[i][j]),this.neuron_layers.get(this.neuron_layer_count-1).relu_derivative[j]));
+			}
+		}
+		
+		for(int i = 0; i < this.neuron_out_count; i++) 
+		{
+			this.neuron_layers.get(this.neuron_layer_count-1).delta_tensors[i] = Tensor.scalarMult(1.0f/inputs.length, differences[i]);
+		}
+	}
+	
+	//generalized backpropagation algorithm
+	public void backpropagate(Tensor[][] inputs, Tensor[][] desired_outputs, float learning_rate) throws Exception
+	{
+		this.computeLastLayerDeltas(inputs, desired_outputs);
+				
+		//computing all other delta tensors
+		Tensor sum;
+		Tensor tmp = new Tensor();
 		for(int i = this.neuron_layer_count-2; i >= 0; i--)
 		{
 			for(int j = 0; j < this.neuron_layers.get(i).neuron_count; j++)
 			{
-				sum = new Tensor(this.neuron_layers.get(i).input_lengths);
+				sum = new Tensor(this.neuron_layers.get(i).output_lengths);
 				for(int k = 0; k < this.neuron_layers.get(i+1).neuron_count; k++)
 				{
-					tmp = Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k],
-													this.neuron_layers.get(i+1).propagation_wideners[k],
-													this.neuron_layers.get(i+1).pooling_lengths);
+					tmp = Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k], 
+							this.neuron_layers.get(i+1).propagation_wideners[k], 
+							this.neuron_layers.get(i+1).pooling_lengths);
 					tmp.convolveWith(Tensor.rot180(this.kernel_layers.get(i).kernels[j][k]));
 					sum = Tensor.add(sum, tmp);
-	
 				}
-				this.neuron_layers.get(i).delta_tensors[j] = Tensor.Hadamard(this.neuron_layers.get(i).relu_derivative[j], sum);
+				sum = Tensor.scalarMult(1.0f/this.neuron_layers.get(i+1).neuron_count, sum);
+				this.neuron_layers.get(i).delta_tensors[j] = Tensor.Hadamard(sum, this.neuron_layers.get(i).relu_derivative[j]);
 			}
 		}
 		
-		//update the weights
+		//update weights
 		Tensor derivative;
 		for(int i = 0; i < this.kernel_layer_count; i++)
 		{
@@ -201,8 +223,13 @@ public class ConvolutionalNeuralNetwork {
 			{
 				for(int k = 0; k < this.kernel_layers.get(i).neuron_out_count; k++)
 				{
-					derivative = Tensor.Hadamard(this.neuron_layers.get(i).neuron_data[j], this.neuron_layers.get(i+1).delta_tensors[k]);
-					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k],Tensor.scalarMult(-learning_rate, derivative));
+					//compute the derivative of the error with respect to the selected kernel
+					derivative = Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k],
+							this.neuron_layers.get(i+1).propagation_wideners[k],
+							this.neuron_layers.get(i+1).pooling_lengths)
+							.convolveWith(this.neuron_layers.get(i).neuron_data[j], this.kernel_layers.get(i).kernel_lengths);
+					//update the kernel
+					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k], Tensor.scalarMult(-learning_rate, derivative)); 
 				}
 			}
 		}

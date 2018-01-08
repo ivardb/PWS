@@ -1,13 +1,20 @@
 package UI;
 
+import java.util.Scanner;
+
 import core.*;
 import exceptions.DimensionException;
 import exceptions.NumericalException;
 
 public class main {
 
+	public static final int COST_RUN_COUNT = 50;
+	public static final int TRAINING_RUN_COUNT = 40;
+	public static final int BATCH_COUNT = 20;
+	public static final float LEARNING_RATE = 0.01f;
+	
 	public static void main(String[] args) 
-	{
+	{	
 		//Optical Character Recognition test.
 		try
 		{
@@ -43,13 +50,45 @@ public class main {
 			
 			if(conv_net.neuron_layer_count == 6)
 			{
-				System.out.println("The neural network has successfully been initialized.");
+				System.out.println("The neural network has successfully been initialized.\n");
 			}
 			else
 			{
-				System.out.println("Error encounterd during network intitialization. Shutting down.");
+				System.out.println("Error encounterd during network intitialization. Shutting down...");
 				return;
 			}
+			
+			/*try
+			{
+				Tensor[][] inputs = new Tensor[10][];
+				Tensor[][] desired_outputs = new Tensor[10][];
+				Tensor[][] pair = new Tensor[2][];
+				for(int i = 0; i < 10; i++)
+				{
+					pair = Testing.getRandomClassifiedDigits();
+					inputs[i] = pair[0];
+					desired_outputs[i] = pair[1];
+				}
+				
+				conv_net.process(pair[0]);
+				for(int i = 0; i < 10; i++)
+				{
+					System.out.print("("+conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data[i].getSerializedData()[0]+", "+pair[1][i].getSerializedData()[0]+"), ");
+				}
+				System.out.print("\n");
+				
+				conv_net.backpropagate(inputs, desired_outputs, 0.01f);
+				
+				conv_net.process(pair[0]);
+				for(int i = 0; i < 10; i++)
+				{
+					System.out.print("("+conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data[i].getSerializedData()[0]+", "+pair[1][i].getSerializedData()[0]+"), ");
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}*/
 			
 			try
 			{
@@ -57,11 +96,130 @@ public class main {
 				Tensor[][] pair = Testing.getRandomClassifiedDigits();
 				conv_net.process(pair[0]);
 				long end_time = System.nanoTime();
-				System.out.println("Test run succesful in "+(float)(end_time-start_time)/1000000000 +" seconds. Preparing main training stage...");
+				System.out.println("Test run succesful in "+(float)(end_time-start_time)/1000000000 +" seconds. Starting initial cost calculation...\n");
 			}
 			catch(Exception e)
 			{
 				System.out.println("Error encountered during first test run: "+e.getMessage());
+				System.out.println("Shutting down...");
+				return;
+			}
+			
+			try
+			{
+				long start_time = System.nanoTime();
+				
+				float cost = 0.0f;
+				int count = 0;
+				Tensor[][] pair;
+				for(int i = 0; i < COST_RUN_COUNT; i++)
+				{
+					pair = Testing.getRandomClassifiedDigits();
+					conv_net.process(pair[0]);
+					cost += Testing.computeCost(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]);
+					count += Testing.isCorrect(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]) ? 0 : 1;
+				}
+				cost /= COST_RUN_COUNT;
+				
+				long end_time = System.nanoTime();
+				System.out.println("Initial cost calculation fininished in "+(float)(end_time-start_time)/1000000000+" seconds.");
+				System.out.println("Initial cost calculated at: "+cost+", "+count);
+			}
+			catch(Exception e)
+			{
+				System.out.println("Error encountered during initial cost calculation: "+e.getMessage());
+				System.out.println("Shutting down...");
+				return;
+			}
+			
+			try
+			{
+				String line = "";
+				/*Scanner scan = new Scanner(System.in);
+				while(!line.equals("y") && !line.equals("n"))
+				{
+					System.out.print("\nDo you wish to proceed to the main training stage? [y/n]: ");
+					line = scan.nextLine();
+				}
+				scan.close();*/
+				
+				if(line.equals("y") || true)
+				{
+					long start_time = System.nanoTime();
+					
+					Tensor[][] pair;
+					Tensor[][] inputs;
+					Tensor[][] desired_outputs;
+					for(int i = 0; i < TRAINING_RUN_COUNT; i++)
+					{
+						System.out.println("Currently on training cycle: "+(i+1)+"/"+TRAINING_RUN_COUNT);
+						inputs = new Tensor[BATCH_COUNT][];
+						desired_outputs = new Tensor[BATCH_COUNT][];
+						for(int j = 0; j < BATCH_COUNT; j++)
+						{
+							pair = Testing.getRandomClassifiedDigits();
+							inputs[j] = pair[0];
+							desired_outputs[j] = pair[1];
+						}
+						conv_net.backpropagate(inputs, desired_outputs, LEARNING_RATE);
+					}
+					
+					long end_time = System.nanoTime();
+					System.out.println("Main training stage finished in: "+(float)(end_time-start_time)/1000000000+" seconds. Starting final cost calculation...\n");
+				}
+				else
+				{
+					System.out.println("\nAll processes aborted. Shutting down...");
+					return;
+				}
+				
+			}
+			catch(Exception e)
+			{
+				System.out.println("Error encountered during main training stage: "+e.getMessage());
+				System.out.println("Shutting down...");
+				return;
+			}
+			
+			try
+			{
+				long start_time = System.nanoTime();
+				
+				float cost = 0.0f;
+				int count = 0;
+				Tensor[][] pair;
+				for(int i = 0; i < COST_RUN_COUNT; i++)
+				{
+					pair = Testing.getRandomClassifiedDigits();
+					conv_net.process(pair[0]);
+					cost += Testing.computeCost(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]);
+					count += Testing.isCorrect(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]) ? 0 : 1;
+				}
+				cost /= COST_RUN_COUNT;
+				
+				long end_time = System.nanoTime();
+				System.out.println("Final cost calculation fininished in "+(float)(end_time-start_time)/1000000000+" seconds.");
+				System.out.println("Final cost calculated at: "+cost+", "+count);
+			}
+			catch(Exception e)
+			{
+				System.out.println("Error encountered during final cost calculation: "+e.getMessage());
+				System.out.println("Shutting down...");
+				return;
+			}
+			
+			try
+			{
+				Tensor[][] pair = Testing.getRandomClassifiedDigits();
+				conv_net.process(pair[0]);
+				for(int i = 0; i < conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_count; i++)
+				{
+					System.out.print("("+conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data[i].getSerializedData()[0]+", "+pair[1][i].getSerializedData()[0]+"), ");
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
 			}
 			
 		}
@@ -69,6 +227,7 @@ public class main {
 		{
 			e.printStackTrace();
 		}
+		
 		
 		//first multidimensional test
 		/*try
@@ -143,7 +302,7 @@ public class main {
 			ConvolutionalNeuralNetwork.fromString(ConvolutionalNeuralNetwork.toString(conv_net));
 			
 			//run an initial performance test on the network with randomized weights
-			/*Tensor[][] pair;
+			Tensor[][] pair;
 			float cost = 0.0f;
 			for(int i = 0; i < 100; i++)
 			{
@@ -199,6 +358,40 @@ public class main {
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
+		}*/
+		
+		//simple zero-dimensional backpropagation test
+		/*try
+		{
+			NeuronLayer neuron_layer1 = new NeuronLayer(3, new int[] {}, new int[] {});
+			NeuronLayer neuron_layer2 = new NeuronLayer(2, new int[] {}, new int[] {});
+			NeuronLayer neuron_layer3 = new NeuronLayer(2, new int[] {}, new int[] {});
+			
+			KernelLayer kernel_layer1 = new KernelLayer(new Tensor[][] {
+				new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {0.5f})},
+				new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {1.0f})},
+				new Tensor[] {new Tensor(new float[] {2.0f}), new Tensor(new float[] {1.0f})}
+			});
+			
+			KernelLayer kernel_layer2 = new KernelLayer(new Tensor[][] {
+				new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {3.0f})},
+				new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {1.0f})}
+			});
+			
+			ConvolutionalNeuralNetwork conv_net = new ConvolutionalNeuralNetwork(neuron_layer1);
+			conv_net.addKernelLayer(kernel_layer1);
+			conv_net.addNeuronLayer(neuron_layer2);
+			conv_net.addKernelLayer(kernel_layer2);
+			conv_net.addNeuronLayer(neuron_layer3);
+			
+			//conv_net.process(new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {0.0f}), new Tensor(new float[] {1.0f})});
+			conv_net.backpropagate(new Tensor[] {new Tensor(new float[] {1.0f}), new Tensor(new float[] {0.0f}), new Tensor(new float[] {1.0f})}, new Tensor[] {new Tensor(new float[] {2.0f}),  new Tensor(new float[] {0.0f})},0.f);
+		
+			System.out.println(conv_net.neuron_layers.get(1).delta_tensors[0].getSerializedData()[0]+", "+conv_net.neuron_layers.get(1).delta_tensors[1].getSerializedData()[0]);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}*/
 	}
 

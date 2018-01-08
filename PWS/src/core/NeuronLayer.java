@@ -93,9 +93,10 @@ public class NeuronLayer {
 		//perform ReLu and pooling. Try to reduce the dimension
 		for(int i = 0; i < this.neuron_count; i++)
 		{
-			this.relu_derivative[i] = neuron_data[i].ReLu();
 			this.propagation_wideners[i] = neuron_data[i].maxPool(pooling_lengths);
+			this.relu_derivative[i] = neuron_data[i].ReLu();
 			neuron_data[i].reduceDimension();
+			this.relu_derivative[i].reduceDimension();
 		}
 	}
 }

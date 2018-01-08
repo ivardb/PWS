@@ -1,5 +1,6 @@
 package core;
 
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import exceptions.*;
@@ -314,23 +315,27 @@ public class Tensor {
 				}
 			}
 		}
-		
 		this.become(result);
 		
 		return propagation_widener;
 	}
 	
-	//performs the convolution operation on the tensor with given kernel as operator
-	//zero padding is used, so the resulting tensor will be the exact same size as the original
 	public void convolveWith(Tensor kernel) throws DimensionException
 	{
-		if(this.dimension != kernel.dimension)
+		this.become(this.convolveWith(kernel, this.lengths));
+	}
+	
+	//performs the convolution operation on the tensor with given kernel as operator
+	//zero padding is used, so the resulting tensor will be the exact same size as the original
+	public Tensor convolveWith(Tensor kernel, int... result_lengths) throws DimensionException
+	{
+		if(this.dimension != kernel.dimension || this.dimension != result_lengths.length)
 		{
 			throw new DimensionException("dimensions don't match");
 		}
 		
 		//create a temporary tensor to hold the result
-		Tensor result = new Tensor(this.lengths);
+		Tensor result = new Tensor(result_lengths);
 		
 		//holds the 'coordinate' of the cell
 		int[] indices = new int[this.dimension];							
@@ -404,10 +409,11 @@ public class Tensor {
 			}
 		}
 		
-		this.become(result);
+		return result;
 	}
 	
 	//rectified linear unit. return value is used in backpropagation
+	//currentlt LEAKY
 	public Tensor ReLu()
 	{
 		Tensor output = new Tensor(this.lengths);
@@ -416,7 +422,8 @@ public class Tensor {
 		{
 			if(this.data[i] < 0)
 			{
-				this.data[i] = 0.0f;
+				this.data[i]*= 0.1;
+				output.data[i] = 0.1f;
 			}
 			else
 			{
@@ -496,27 +503,42 @@ public class Tensor {
 	
 	public static Tensor invertMaxPooling(Tensor result, Tensor propagation_widener, int... pooling_lengths) throws DimensionException
 	{
-		//dimension/size check
-		if(result.dimension != propagation_widener.dimension || result.dimension != pooling_lengths.length)
-			throw new DimensionException("all inputs must be of the same dimension!");
-		
 		Tensor output = new Tensor(propagation_widener.lengths);
-		int[] indices = new int[propagation_widener.dimension];
-		for(int i = 0; i < indices.length; i++)
+		
+		int[] indices = new int[output.dimension];
+		for(int i = 0; i <  output.dimension; i++)
 		{
 			indices[i] = 0;
 		}
-		int[] pooled_indices = new int[propagation_widener.dimension];
 		
+		//the 'indices' of the preserved indices (dimensions) (that is, preserved during max pooling) 
+		int[] index_indices = new int[result.dimension];
+		int index = 0;
+		for(int i = 0; i < propagation_widener.dimension; i++)
+		{
+			if(propagation_widener.lengths[i] != pooling_lengths[i])
+			{
+				index_indices[index] = i;
+				index++;
+			}
+		}
+		
+		if(index_indices.length != result.dimension)
+		{
+			throw new DimensionException("Invalid input.");
+		}
+		
+		int[] result_indices = new int[result.dimension];
 		for(int i = 0; i < output.total_data_length; i++)
 		{
+			
 			if(propagation_widener.get(indices) == 1)
 			{
-				for(int j = 0; j < propagation_widener.dimension; j++)
+				for(int j = 0; j < result.dimension; j++)
 				{
-					pooled_indices[j] = indices[j]/pooling_lengths[j];
+					result_indices[j] = indices[index_indices[j]] / pooling_lengths[index_indices[j]];
 				}
-				output.set(result.get(pooled_indices), indices);
+				output.set(result.get(result_indices), indices);
 			}
 			
 			//update indices
