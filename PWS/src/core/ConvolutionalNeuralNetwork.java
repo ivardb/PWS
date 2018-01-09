@@ -193,7 +193,7 @@ public class ConvolutionalNeuralNetwork {
 	public void backpropagate(Tensor[][] inputs, Tensor[][] desired_outputs, float learning_rate) throws Exception
 	{
 		this.computeLastLayerDeltas(inputs, desired_outputs);
-				
+		
 		//computing all other delta tensors
 		Tensor sum;
 		Tensor tmp = new Tensor();
@@ -210,7 +210,6 @@ public class ConvolutionalNeuralNetwork {
 					tmp.convolveWith(Tensor.rot180(this.kernel_layers.get(i).kernels[j][k]));
 					sum = Tensor.add(sum, tmp);
 				}
-				sum = Tensor.scalarMult(1.0f/this.neuron_layers.get(i+1).neuron_count, sum);
 				this.neuron_layers.get(i).delta_tensors[j] = Tensor.Hadamard(sum, this.neuron_layers.get(i).relu_derivative[j]);
 			}
 		}
@@ -224,10 +223,10 @@ public class ConvolutionalNeuralNetwork {
 				for(int k = 0; k < this.kernel_layers.get(i).neuron_out_count; k++)
 				{
 					//compute the derivative of the error with respect to the selected kernel
-					derivative = Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k],
+					derivative = Tensor.cap(Tensor.invertMaxPooling(this.neuron_layers.get(i+1).delta_tensors[k],
 							this.neuron_layers.get(i+1).propagation_wideners[k],
 							this.neuron_layers.get(i+1).pooling_lengths)
-							.convolveWith(this.neuron_layers.get(i).neuron_data[j], this.kernel_layers.get(i).kernel_lengths);
+							.convolveWith(this.neuron_layers.get(i).neuron_data[j], this.kernel_layers.get(i).kernel_lengths),-10.0f,10.0f);
 					//update the kernel
 					this.kernel_layers.get(i).kernels[j][k] = Tensor.add(this.kernel_layers.get(i).kernels[j][k], Tensor.scalarMult(-learning_rate, derivative)); 
 				}

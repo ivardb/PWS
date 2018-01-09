@@ -593,5 +593,25 @@ public class Tensor {
 		
 		return output;
 	}
+	
+	public static Tensor cap(Tensor in, float min_val, float max_val)
+	{
+		Tensor out = new Tensor();
+		out.become(in);
+
+		float[] data = in.getSerializedData();
+		for(int i = 0; i < data.length; i++)
+		{
+			if(data[i] > max_val)
+			{
+				out.data[i] = max_val;
+			}
+			else if(data[i] < min_val)
+			{
+				out.data[i] = min_val;
+			}
+		}
+		return out;
+	}
 }
 
