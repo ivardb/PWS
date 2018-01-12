@@ -15,8 +15,15 @@ public class main {
 	
 	public static void main(String[] args) 
 	{	
+		try {
+			Tensor[][] pair = Testing.getRandomDiagonalPair();
+		} catch (DimensionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		//Optical Character Recognition test.
-		try
+		/*try
 		{
 			//the first layer will take in 3 Tensors, each 2-dimensional and of size 256x256, representing the R, G and B components.
 			NeuronLayer neuron_layer1 = new NeuronLayer(3, new int[] {256,256}, new int[] {1,1});
@@ -216,7 +223,7 @@ public class main {
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}
+		}*/
 		
 		
 		//first multidimensional test
