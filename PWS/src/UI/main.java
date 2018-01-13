@@ -15,10 +15,88 @@ public class main {
 	
 	public static void main(String[] args) 
 	{	
-		try {
-			Tensor[][] pair = Testing.getRandomDiagonalPair();
-		} catch (DimensionException e) {
-			// TODO Auto-generated catch block
+		//Simple multidimensional classification test: This test works
+		try
+		{
+			NeuronLayer neuron_layer1 = new NeuronLayer(1,new int[] {8,8}, new int[] {1,1});
+			NeuronLayer neuron_layer2 = new NeuronLayer(10,new int[] {8,8}, new int[] {2,2});
+			NeuronLayer neuron_layer3 = new NeuronLayer(10,new int[] {4,4}, new int[] {2,2});
+			NeuronLayer neuron_layer4 = new NeuronLayer(10,new int[] {2,2}, new int[] {2,2});
+			NeuronLayer neuron_layer5 = new NeuronLayer(10,new int[] {}, new int[] {});
+			NeuronLayer neuron_layer6 = new NeuronLayer(1,new int[] {}, new int[] {});
+			
+			KernelLayer kernel_layer1 = new KernelLayer(new int[] {4,4},1,10,-2.0f,2.0f);
+			KernelLayer kernel_layer2 = new KernelLayer(new int[] {2,2},10,10,-2.0f,2.0f);
+			KernelLayer kernel_layer3 = new KernelLayer(new int[] {2,2},10,10,-2.0f,2.0f);
+			KernelLayer kernel_layer4 = new KernelLayer(new int[] {},10,10,-2.0f,2.0f);
+			KernelLayer kernel_layer5 = new KernelLayer(new int[] {},10,1,-2.0f,2.0f);
+			
+			ConvolutionalNeuralNetwork conv_net = new ConvolutionalNeuralNetwork(neuron_layer1);
+			
+			conv_net.addKernelLayer(kernel_layer1);
+			conv_net.addNeuronLayer(neuron_layer2);
+			conv_net.addKernelLayer(kernel_layer2);
+			conv_net.addNeuronLayer(neuron_layer3);
+			conv_net.addKernelLayer(kernel_layer3);
+			conv_net.addNeuronLayer(neuron_layer4);
+			conv_net.addKernelLayer(kernel_layer4);
+			conv_net.addNeuronLayer(neuron_layer5);
+			conv_net.addKernelLayer(kernel_layer5);
+			conv_net.addNeuronLayer(neuron_layer6);
+			
+			if(conv_net.neuron_layer_count == 6)
+			{
+				System.out.println("Network initialization succesful. Proceeding to initial cost calculation.");
+			}
+			else
+			{
+				System.out.println("An error ocurred during network initialization. Shutting down...");
+				return;
+			}
+			
+			float cost = 0.0f;
+			int count = 0;
+			Tensor[][] pair;
+			for(int i = 0; i < COST_RUN_COUNT; i++)
+			{
+				pair = Testing.getRandomDiagonalPair();
+				conv_net.process(pair[0]);
+				cost += Testing.computeCost(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]);
+				count += Testing.isCorrect(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]) ? 1 : 0;
+			}
+			System.out.println("Initial cost calculated at: "+(cost/COST_RUN_COUNT)+", "+((float)count)/COST_RUN_COUNT);
+			
+			Tensor[][] in, desout;
+			for(int i = 0; i < TRAINING_RUN_COUNT; i++)
+			{
+				in = new Tensor[BATCH_COUNT][];
+				desout = new Tensor[BATCH_COUNT][];
+				for(int j = 0; j < BATCH_COUNT; j++)
+				{
+					pair = Testing.getRandomDiagonalPair();
+					in[j] = pair[0];
+					desout[j] = pair[1];
+				}
+				conv_net.backpropagate(in, desout, LEARNING_RATE);
+			}
+			
+			cost = 0.0f;
+			count = 0;
+			for(int i = 0; i < COST_RUN_COUNT; i++)
+			{
+				pair = Testing.getRandomDiagonalPair();
+				conv_net.process(pair[0]);
+				cost += Testing.computeCost(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]);
+				count += Testing.isCorrect(conv_net.neuron_layers.get(conv_net.neuron_layer_count-1).neuron_data, pair[1]) ? 1 : 0;
+			}
+			System.out.println("Final cost calculated at: "+(cost/COST_RUN_COUNT)+", "+((float)count)/COST_RUN_COUNT);
+			
+			pair = Testing.getRandomDiagonalPair();
+			conv_net.process(pair[0]);
+			System.out.println(conv_net.neuron_layers.get(5).neuron_data[0].getSerializedData()[0]+", "+pair[1][0].getSerializedData()[0]);
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 		

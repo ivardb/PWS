@@ -59,14 +59,19 @@ public class Tensor {
 	//merges an array of same-size tensors into one large tensor
 	public Tensor(Tensor[] tensors) throws DimensionException
 	{
-		//create a new, temporary tensor of the correct dimensions
-		int[] lengths = new int[tensors[0].dimension + 1];
-		for(int i = 0; i < tensors[0].dimension; i++)
+		//dimension check
+		for(int i = 0; i < tensors.length; i++)
 		{
 			if(tensors[i].dimension != tensors[0].dimension)
 			{
 				throw new DimensionException("Not all tensors are of the same dimension");
 			}
+		}
+		
+		//create a new, temporary tensor of the correct dimensions
+		int[] lengths = new int[tensors[0].dimension + 1];
+		for(int i = 0; i < tensors[0].dimension; i++)
+		{
 			lengths[i] = tensors[0].lengths[i];
 		}
 		lengths[tensors[0].dimension] = tensors.length;
