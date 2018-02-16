@@ -9,7 +9,7 @@ import exceptions.NumericalException;
 public class main {
 
 	public static final int COST_RUN_COUNT = 100;
-	public static final int TRAINING_RUN_COUNT = 15000;
+	public static final int TRAINING_RUN_COUNT = 1500;
 	public static final int BATCH_COUNT = 40;
 	public static final float LEARNING_RATE = 0.01f;
 	
@@ -44,7 +44,13 @@ public class main {
 			conv_net.addKernelLayer(kernel_layer5);
 			conv_net.addNeuronLayer(neuron_layer6);
 			
-			if(conv_net.neuron_layer_count == 6)
+			String str = ConvolutionalNeuralNetwork.toString(conv_net);
+			//System.out.println(str);
+			ConvolutionalNeuralNetwork net2 = ConvolutionalNeuralNetwork.fromString(str);
+			System.out.println(str.equals(ConvolutionalNeuralNetwork.toString(net2)));
+		
+			//temp
+			/*if(conv_net.neuron_layer_count == 6)
 			{
 				System.out.println("Network initialization succesful. Proceeding to initial cost calculation.");
 			}
@@ -98,7 +104,7 @@ public class main {
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}
+		}*/
 		
 		//Optical Character Recognition test.
 		/*try
@@ -295,13 +301,13 @@ public class main {
 			catch(Exception e)
 			{
 				e.printStackTrace();
-			}
+			}*/
 			
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}*/
+		}
 		
 		
 		//first multidimensional test

@@ -237,7 +237,20 @@ public class ConvolutionalNeuralNetwork {
 	public static String toString(ConvolutionalNeuralNetwork net)
 	{
 		String str = "";
-
+		
+		for(int i = 0; i < net.kernel_layer_count; i++)
+		{
+			//appending a '0' to the front in order to be able to distinguish the header ending from zero-dimensional kernels later on
+			str += "0";
+			for(int j = 0 ; j < net.kernel_layers.get(i).dimension; j++)
+			{
+				str += net.kernel_layers.get(i).kernel_lengths[j]+",";
+			}
+			str += "\n";
+		}
+		
+		str += "\n";
+		
 		/*first, a header specifying the structure. 
 		Every line represents another neuron layer. 
 		In the comma separated list, we first have the amount of neurons in that layer and then the dimension of the input.
@@ -251,11 +264,11 @@ public class ConvolutionalNeuralNetwork {
 			}
 			for(int j = 0; j < net.neuron_layers.get(i).dimension_in; j++)
 			{
-				str += net.neuron_layers.get(i).pooling_lengths[j];
+				str += net.neuron_layers.get(i).pooling_lengths[j]+",";
 			}
 			str += "\n";
 		}
-		//now, an empty line signifies the end of the header
+		//now, an empty line signifies the end of the first header
 		str += "\n";
 		
 		//adding all the weights to the string
@@ -280,73 +293,90 @@ public class ConvolutionalNeuralNetwork {
 		return str;
 	}
 	
-	public static ConvolutionalNeuralNetwork fromString(String parameters) throws DimensionException, NumericalException
+	public static ConvolutionalNeuralNetwork fromString(String parameters) throws Exception
 	{
-	    // splitting the string into lines
-		String[] values = parameters.split("\n");
-	    System.out.println(values.length);
-	    
-	    // separating the header from the weights
-	    int header_index = 0;
-	    for(int i = 0; i < values.length; i++)
-	    {	
-	    	if(values[i] == "")
-	    	{
-	    		header_index = i;
-	    	}
-	    }
-	    String[] string_header = new String[header_index];
-	    for(int i = 0; i < header_index; i++)
-	    {
-	    	string_header[i] = values[i];
-	    }
-	    int[][] header = new int[string_header.length][];
-	    String[] tmp;
-	    for(int i = 0; i < string_header.length; i++)
-	    {
-	    	tmp = string_header[i].split(",");
-	    	header[i] = new int[tmp.length];
-	    	for(int j = 0; j < tmp.length; j++)
-	    	{
-	    		header[i][j] = Integer.parseInt(tmp[j]);
-	    	}
-	    }
-	    
-	    //create neuron layers
-	    NeuronLayer[] neuron_layers = new NeuronLayer[header.length];
-	    int[] input_lengths;
-	    int[] pooling_lengths;
-	    for(int i = 0; i < header.length; i++)
-	    {
-	    	input_lengths = new int[header[i].length/2];
-	    	pooling_lengths = new int[header[i].length/2];
-	    	for(int j = 1; j < (header[i].length+1)/2; j++)
-	    	{
-	    		input_lengths[j] = header[i][1+j];
-	    		pooling_lengths[j] = header[i][(header[i].length+1)/2 + j];
-	    	}
-	    	neuron_layers[i] = new NeuronLayer(header[i][0], input_lengths, pooling_lengths);
-	    }
-	    
-	    // separating weights from the header
-	    String[] string_weights = new String[values.length - header_index];
-	    int number_of_kernel_layers = header_index - 1;
-	    for(int i = header_index; i < values.length; i++)
-	    {
-	    	string_weights[i] = values[i];
-	    }
-	    for(int i = 0; i < number_of_kernel_layers; i++)
-	    {
-	    	for(int j = 0; j < header[i][0] * header[i+1][0]; i++)
-	    	{
-	    		
-	    	}
-	    		
-	    }
-	    	
-	    
-	    
-		return null;
+		//splitting the string into lines
+		String[] lines = parameters.split("\n");
+		
+		//extracting kernel size data from the first header
+		int header_ending_index = 0;
+		while(!lines[header_ending_index].isEmpty())
+			header_ending_index++;
+		
+		int[][] kernel_layer_lengths = new int[header_ending_index][];
+		for(int i = 0 ; i <  kernel_layer_lengths.length; i++)
+		{
+			kernel_layer_lengths[i] = lines[i].equals("0") ? new int[] {} : Arrays.asList(lines[i].split(",")).stream().mapToInt(Integer::parseInt).toArray();
+		}
+		
+		//determining the end of second header
+		int second_header_ending_index = header_ending_index + 1;
+		while(!lines[second_header_ending_index].isEmpty())
+			second_header_ending_index++;
+		
+		//loading all neuron layers based on the second header
+		NeuronLayer[] neuron_layers = new NeuronLayer[second_header_ending_index-header_ending_index-1];
+		int[] values, input_lengths, pooling_lengths;
+		for(int i = header_ending_index+1; i < second_header_ending_index ; i++)
+		{
+			//turning the comma separated list of strings into an array of integers with a lambda expression
+			values = Arrays.asList(lines[i].split(",")).stream().mapToInt(Integer::parseInt).toArray();
+			
+			//taking out the input lengths and pooling lengths
+			input_lengths = new int[(values.length-1)/2];
+			pooling_lengths = new int[(values.length-1)/2];
+			for(int j = 0; j < (values.length-1)/2; j++)
+			{
+				input_lengths[j] = values[j+1];
+				pooling_lengths[j] = values[j+(values.length-1)/2+1];
+			}
+			
+			neuron_layers[i-header_ending_index-1] = new NeuronLayer(values[0], input_lengths, pooling_lengths);
+		}
+		
+		//the kernel layers are loaded
+		KernelLayer[] kernel_layers = new KernelLayer[neuron_layers.length-1];
+		int line_index = second_header_ending_index+1;
+		Tensor[][] layer_data;
+		int[] kernel_lengths;
+		float[] line_data;
+		String[] strings;
+		for(int i = 0; i <  kernel_layers.length; i++)
+		{
+			layer_data = new Tensor[neuron_layers[i].neuron_count][];
+			for(int j = 0; j < neuron_layers[i].neuron_count; j++)
+			{
+				layer_data[j] = new Tensor[neuron_layers[i+1].neuron_count];
+				for(int k = 0; k < neuron_layers[i+1].neuron_count; k++)
+				{
+					//extract kernel data
+					strings = lines[line_index].split(",");
+					line_data = new float[strings.length];
+					for(int l = 0; l < line_data.length; l++)
+					{
+						line_data[l] = Float.valueOf(strings[l]);
+					}
+					
+					//create kernel
+					layer_data[j][k] = new Tensor(line_data, kernel_layer_lengths[i]);
+					
+					line_index++;
+				}
+			}
+			//create kernel layer
+			kernel_layers[i] = new KernelLayer(layer_data);
+		}
+		
+		//create the network
+		ConvolutionalNeuralNetwork net = new ConvolutionalNeuralNetwork(neuron_layers[0]);
+		for(int i = 0; i < kernel_layers.length; i++)
+		{
+			net.addKernelLayer(kernel_layers[i]);
+			net.addNeuronLayer(neuron_layers[i+1]);
+		}
+		System.out.println(net.neuron_layer_count+", "+neuron_layers.length);
+		
+		return net;
 	}
 
 }
