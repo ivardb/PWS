@@ -1,0 +1,41 @@
+\contentsline {section}{\numberline {1}Introduction}{4}{section.1}
+\contentsline {subsection}{\numberline {1.1}Main Question}{4}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Demarcation}{5}{subsection.1.2}
+\contentsline {subsubsection}{\numberline {1.2.1}Specificity}{5}{subsubsection.1.2.1}
+\contentsline {subsubsection}{\numberline {1.2.2}Measurability}{5}{subsubsection.1.2.2}
+\contentsline {subsubsection}{\numberline {1.2.3}Acceptability}{5}{subsubsection.1.2.3}
+\contentsline {subsubsection}{\numberline {1.2.4}Realistic}{6}{subsubsection.1.2.4}
+\contentsline {subsubsection}{\numberline {1.2.5}Time-bound}{6}{subsubsection.1.2.5}
+\contentsline {section}{\numberline {2}Sub-questions}{7}{section.2}
+\contentsline {section}{\numberline {3}Research method}{8}{section.3}
+\contentsline {subsection}{\numberline {3.1}Literature research as preparation for building the AI}{8}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Comparing the AI to humans}{8}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Percentage of given pictures recognized}{9}{subsubsection.3.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2}Amount of pictures recognized in a given period of time}{9}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.3}The difference in learning time}{10}{subsubsection.3.2.3}
+\contentsline {subsubsection}{\numberline {3.2.4}Recognizing people in different stages in their lives}{10}{subsubsection.3.2.4}
+\contentsline {subsubsection}{\numberline {3.2.5}Teaching the AI other tasks than facial recognition}{10}{subsubsection.3.2.5}
+\contentsline {subsubsection}{\numberline {3.2.6}One AI performing multiple tasks}{11}{subsubsection.3.2.6}
+\contentsline {section}{\numberline {4}Convolutional neural networks explained}{12}{section.4}
+\contentsline {subsection}{\numberline {4.1}Classical neural networks}{12}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Convolutional neural networks}{14}{subsection.4.2}
+\contentsline {subsubsection}{\numberline {4.2.1}Features}{14}{subsubsection.4.2.1}
+\contentsline {subsubsection}{\numberline {4.2.2}Convolution}{15}{subsubsection.4.2.2}
+\contentsline {subsubsection}{\numberline {4.2.3}ReLu}{16}{subsubsection.4.2.3}
+\contentsline {subsubsection}{\numberline {4.2.4}Pooling}{16}{subsubsection.4.2.4}
+\contentsline {subsubsection}{\numberline {4.2.5}Training}{17}{subsubsection.4.2.5}
+\contentsline {subsection}{\numberline {4.3}The network}{20}{subsection.4.3}
+\contentsline {section}{\numberline {5}The code explained}{21}{section.5}
+\contentsline {subsection}{\numberline {5.1}The FileHandler class}{21}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}The Preprocessing class}{22}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3}The Tensor class}{23}{subsection.5.3}
+\contentsline {subsubsection}{\numberline {5.3.1}getSerializedDataIndex}{25}{subsubsection.5.3.1}
+\contentsline {subsubsection}{\numberline {5.3.2}flatten and ReLu}{27}{subsubsection.5.3.2}
+\contentsline {subsubsection}{\numberline {5.3.3}convolveWith and maxPooling}{27}{subsubsection.5.3.3}
+\contentsline {subsubsection}{\numberline {5.3.4}reduceDimension}{30}{subsubsection.5.3.4}
+\contentsline {subsection}{\numberline {5.4}Tensor arithmetic}{31}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.5}invertMaxPooling and rot180}{31}{subsection.5.5}
+\contentsline {subsection}{\numberline {5.6}The Training class}{32}{subsection.5.6}
+\contentsline {subsection}{\numberline {5.7}The ConvolutionalNeuralNetwork class}{34}{subsection.5.7}
+\contentsline {subsection}{\numberline {5.8}The NeuronLayer class}{36}{subsection.5.8}
+\contentsline {subsection}{\numberline {5.9}The KernelLayer class}{38}{subsection.5.9}
