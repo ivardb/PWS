@@ -259,7 +259,7 @@ public class CharacterFrequencyRecognition {
 				{
 					System.out.print("Would you like to\n\t(1) reinitialize to the standard network\n\t(2) load a custom network\n\t(3) save the current network\n\t(4) go back to the main menu\n:");
 					ans2 = scanner.nextInt();
-					scanner.nextInt();
+					scanner.nextLine();
 					
 					if(ans2 == 1)
 					{
