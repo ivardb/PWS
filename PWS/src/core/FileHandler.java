@@ -23,15 +23,11 @@ public static void writeToFile(String file_path, String file_content)
 			}
 	}
 	
-	public static String readFromFile(String file_path) 
+	public static String readFromFile(String file_path) throws IOException
 	{
 		//get file contents in a string
-		String file_content = null;
-		try {
-			file_content = new String(Files.readAllBytes(Paths.get(file_path)));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String file_content = "";
+		file_content = new String(Files.readAllBytes(Paths.get(file_path)));
 		return file_content;
 	}
 	

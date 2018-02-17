@@ -34,7 +34,7 @@ public class ConvolutionalNeuralNetwork {
 	private int kernel_layer_count;
 	
 	private int neuron_in_count;
-	private int neuron_out_count;
+	public int neuron_out_count;
 	
 	private int dimension_in;
 	private int dimension_out;
