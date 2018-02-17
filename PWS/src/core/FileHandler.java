@@ -10,17 +10,13 @@ public class FileHandler {
 public final static int picture_width = 256;
 public final static int picture_height = 256;
 
-public static void writeToFile(String file_path, String file_content) 
+public static void writeToFile(String file_path, String file_content) throws IOException 
 	{
 		// Writing content
-		try {
-			FileWriter f_writer = new FileWriter(file_path);
-			BufferedWriter b_writer = new BufferedWriter(f_writer);
-			b_writer.write(file_content);
-			b_writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	FileWriter f_writer = new FileWriter(file_path);
+	BufferedWriter b_writer = new BufferedWriter(f_writer);
+	b_writer.write(file_content);
+	b_writer.close();
 	}
 	
 	public static String readFromFile(String file_path) throws IOException
